@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!-- 
+	Module D_MsWeather.xml
+	Written by R.Boer. 
+	V0.1, 15 February 2021
+-->
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+	<specVersion>
+		<major>1</major>
+		<minor>0</minor>
+	</specVersion>
+	<device>
+		<deviceType>urn:schemas-micasaverde-com:device:Weather:1</deviceType>
+		<staticJson>D_MsWeather.json</staticJson>
+		<friendlyName>Multi Weather Station</friendlyName>
+		<manufacturer>Rene Boer</manufacturer>
+		<manufacturerURL>https://github.com/reneboer/MsWeather</manufacturerURL>
+		<modelDescription>Multi Weather Station Plugin</modelDescription>
+		<modelName>MSW</modelName>
+		<modelNumber>1</modelNumber>
+		<handleChildren>1</handleChildren>
+		<Category_Num>25</Category_Num>
+		<UDN></UDN>
+		<serviceList>
+			<service>
+				<serviceType>urn:schemas-micasaverde-com:service:Weather:1</serviceType>
+				<serviceId>urn:upnp-micasaverde-com:serviceId:Weather1</serviceId>
+				<SCPDURL>S_MsWeather.xml</SCPDURL>
+			</service>
+		</serviceList>
+		<implementationList>
+			<implementationFile>I_MsWeather.xml</implementationFile>
+		</implementationList>
+	</device>
+</root>

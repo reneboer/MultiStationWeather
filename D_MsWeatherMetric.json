@@ -1,0 +1,203 @@
+{
+	"default_icon": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeather-default.png",
+    "state_icons":[
+		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_0.png", 
+			"conditions": [ 
+				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+					"variable": "IconSet", 
+					"operator": "==","value": 0 
+				} 
+			]
+		},
+		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_25.png", 
+			"conditions": [ 
+				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+					"variable": "IconSet", 
+					"operator": "==","value": 1 
+				} 
+			]
+		},
+		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_50.png", 
+			"conditions": [ 
+				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+					"variable": "IconSet", 
+					"operator": "==","value": 2 
+				} 
+			]
+		},
+		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_75.png", 
+			"conditions": [ 
+				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+					"variable": "IconSet", 
+					"operator": "==","value": 3 
+				} 
+			]
+		},
+		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_100.png", 
+			"conditions": [ 
+				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+					"variable": "IconSet", 
+					"operator": "==","value": 4 
+				} 
+			]
+		},
+		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_125.png", 
+			"conditions": [ 
+				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+					"variable": "IconSet", 
+					"operator": "==","value": 5 
+				} 
+			]
+		}
+    ],
+    "DisplayStatus": {
+        "Service": "urn:upnp-micasaverde-com:serviceId:Weather1",
+        "Variable": "IconSet",
+        "MinValue": "0",
+        "MaxValue": "10"
+    },
+	"Tabs": [
+		{
+			"Label": {
+				"lang_tag": "tabname_control",
+				"text": "Control"
+			},
+			"Position": "0",
+			"TabType": "flash",
+			"ControlGroup":[
+				{
+					"id": "1",
+					"scenegroup": "1"
+				}
+			],
+			"SceneGroup":[
+				{
+					"id": "1",
+					"top": "1.5",
+					"left": "0.25",
+					"x": "1.5",
+					"y": "2"
+				}
+			],
+			"Control": [
+				{
+					"ControlGroup":"1",
+					"ControlType": "variable",
+					"top": "0",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:altui1",
+						"Variable": "DisplayLine1",
+						"Top": 60,
+						"Left": 50,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "line_break"
+				},
+				{
+					"ControlGroup":"1",
+					"ControlType": "variable",
+					"top": "1",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:altui1",
+						"Variable": "DisplayLine2",
+						"Top": 80,
+						"Left": 50,
+						"Width": 75,
+						"Height": 20
+					}
+				}
+			]
+		},
+		{
+			"Label": {
+				"lang_tag": "advanced",
+				"text": "Advanced"
+			},
+			"Position": "1",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "advanced_device"
+		},
+        {
+            "Label": {
+                "lang_tag": "logs",
+                "text": "Logs"
+            },
+            "Position": "2",
+            "TabType": "javascript",
+            "ScriptName": "shared.js",
+            "Function": "device_logs"
+        },
+        {
+            "Label": {
+                "lang_tag": "notifications",
+                "text": "Notifications"
+            },
+            "Position": "3",
+            "TabType": "javascript",
+            "ScriptName": "shared.js",
+            "Function": "device_notifications"
+        }
+	],
+"eventList2": [
+        {
+            "id": 1,
+            "label": {
+                "lang_tag": "metric_goes_above",
+                "text": "Metric goes above"
+            },
+            "serviceId": "urn:micasaverde-com:serviceId:GenericSensor1",
+			"norepeat": "1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "i4",
+                    "name": "CurrentLevel",
+                    "comparisson": ">",
+                    "prefix": {
+						"lang_tag":"Metric",
+						"text": "Metric"
+					},
+                    "suffix": {},
+                    "HumanFriendlyText": {
+                        "lang_tag": "hft_metric_goes_above",
+                        "text": "Metric reported by _DEVICE_NAME_ goes above _ARGUMENT_VALUE_"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "label": {
+                "lang_tag": "metric_goes_below",
+                "text": "Metric goes below"
+            },
+            "serviceId": "urn:micasaverde-com:serviceId:GenericSensor1",
+			"norepeat": "1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "i4",
+                    "name": "CurrentLevel",
+                    "comparisson": "<",
+                    "prefix": {
+						"lang_tag":"Metric",
+						"text": "Metric"
+					},
+                    "suffix": {},
+                    "HumanFriendlyText": {
+                        "lang_tag": "metrics_below",
+                        "text": "Metric reported by _DEVICE_NAME_ goes below _ARGUMENT_VALUE_"
+                    }
+                }
+            ]
+        }
+    ],
+	"DeviceType": "urn:schemas-micasaverde-com:device:WeatherMetric:1"
+}
