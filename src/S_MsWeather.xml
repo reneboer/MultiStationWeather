@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<!-- 
+	Module S_MsWeather.xml
+	Written by R.Boer. 
+	V0.1, 15 February 2021
+-->
+<scpd xmlns="urn:schemas-upnp-org:service-1-0">
+	<specVersion>
+		<major>1</major>
+		<minor>0</minor>
+	</specVersion>
+	<serviceStateTable>
+		<stateVariable sendEvents="no"><name>Key</name>							<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>Latitude</name>					<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>Longitude</name>					<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>ProviderURL</name>					<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>ProviderName</name>				<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>Period</name>						<dataType>ui2</dataType>	<defaultValue>1800</defaultValue></stateVariable>
+		<stateVariable sendEvents="no"><name>Units</name>						<dataType>string</dataType>	<defaultValue>auto</defaultValue> </stateVariable>
+		<stateVariable sendEvents="no"><name>Language</name>					<dataType>string</dataType>	<defaultValue>en</defaultValue> </stateVariable>
+		<stateVariable sendEvents="no"><name>LogLevel</name>					<dataType>ui2</dataType>	<defaultValue>1</defaultValue></stateVariable>
+		<stateVariable sendEvents="yes"><name>icon</name>						<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentApparentTemperature</name>	<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentTemperature</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentCloudCover</name>			<dataType>ui1</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentDewPoint</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentHumidity</name>			<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentPressure</name>			<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentLevel</name>				<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentOzone</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentuvIndex</name>				<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentPrecipIntensity</name>		<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentPrecipProbability</name>	<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentPrecipType</name>			<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentVisibility</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentConditions</name>			<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentWindBearing</name>			<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentWindSpeed</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentWindGust</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>WeekConditions</name>				<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayCloudCover</name>				<dataType>ui1</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayConditions</name>				<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayDewPoint</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayHighTemp</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayHumidity</name>				<dataType>ui1</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayIcon</name>					<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayLowTemp</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayMaxTemp</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayMinTemp</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayOzone</name>					<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayPrecipType</name>				<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayPressure</name>				<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayVisibility</name>				<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayWindBearing</name>			<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayWindGust</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayWindSpeed</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayuvIndex</name>				<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowCloudCover</name>			<dataType>ui1</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowConditions</name>			<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowDewPoint</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowHighTemp</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowHumidity</name>			<dataType>ui1</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowIcon</name>				<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowLowTemp</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowMaxTemp</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowMinTemp</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowOzone</name>				<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowPrecipType</name>			<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowPressure</name>			<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowVisibility</name>			<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowWindBearing</name>			<dataType>ui2</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowWindGust</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowWindSpeed</name>			<dataType>float</dataType>	</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowuvIndex</name>				<dataType>ui2</dataType>	</stateVariable>
+	</serviceStateTable>
+	<actionList>
+		<action>
+			<name>SetUnits</name>
+			<argumentList>
+				<argument>
+					<name>newUnits</name>
+					<direction>in</direction>
+					<relatedStateVariable>Units</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>SetLocation</name>
+			<argumentList>
+				<argument>
+					<name>newLatitude</name>
+					<direction>in</direction>
+					<relatedStateVariable>Latitude</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>newLongitude</name>
+					<direction>in</direction>
+					<relatedStateVariable>Longitude</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>SetPeriod</name>
+			<argumentList>
+				<argument>
+					<name>newPeriod</name>
+					<direction>in</direction>
+					<relatedStateVariable>Period</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>SetLanguage</name>
+			<argumentList>
+				<argument>
+					<name>newLanguage</name>
+					<direction>in</direction>
+					<relatedStateVariable>Language</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>SetProviderKey</name>
+			<argumentList>
+				<argument>
+					<name>newKey</name>
+					<direction>in</direction>
+					<relatedStateVariable>Key</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>SetLogLevel</name>
+			<argumentList>
+				<argument>
+					<name>newLogLevel</name>
+					<direction>in</direction>
+					<relatedStateVariable>LogLevel</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+	</actionList>
+</scpd>
