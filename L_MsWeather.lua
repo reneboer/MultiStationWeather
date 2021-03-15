@@ -1331,7 +1331,7 @@ local ProviderMap = {
 					log.Error("AmbientWeather setup is not completed.")
 				end	
 				var.Set("ProvderName", "AmbientWeather")
-				var.Set("ProvderURL", "www.ambientweater.com")
+				var.Set("ProvderURL", "www.ambientweather.com")
 				return complete
 			end, 
 			update = function()
