@@ -15,7 +15,7 @@ https://openweathermap.org/api
 Version 0.1 2021-02-25 - Alpha version for testing
 
 An API key is required for the following Weather Providers:
-	- DarkSky, www.darksky.com
+	- DarkSky
 	- Accu Weather
 	- Open Weather
 Usefull if you have a PWS
@@ -688,7 +688,7 @@ local ProviderMap = {
 						if curDay then
 							varContainer.forecast[fd] = {}
 							for tkey, varName in pairs(PR_VariablesMap.forecast) do
-								local value = curItems[tkey]
+								local value = curDay[tkey]
 								if value then
 									if varName == "Icon" then value = iconMap[value] or 44 end
 									ti(varContainer.forecast[fd], {varName, value})
@@ -950,21 +950,14 @@ local ProviderMap = {
 						["visibility"] = "Visibility",
 						["rain|snow"] = "PrecipIntensity",
 --						[""] = "PrecipIntensityMax",
---						[""] = "PrecipIntensityMaxTime",
 						["pop"] = "PrecipProbability",
 						["o|rain|snow"] = "PrecipType",
 						["temp.max"] = "MaxTemp",
---						[""] = "MaxTempTime",
 						["temp.min"] = "MinTemp",
---						[""] = "MinTempTime",
 						["temp.day"] = "HighTemp",
---						[""] = "HighTempTime",
 						["temp.night"] = "LowTemp",
---						[""] = "LowTempTime",
 						["feels_like.day"] = "ApparentMaxTemp",
---						[""] = "ApparentMaxTempTime",
 						["feels_like.night"] = "ApparentMinTemp",
---						[""] = "ApparentMinTempTime",
 						["weather.icon"] = "Icon",
 						["clouds"] = "CloudCover",
 						["dew_point"] = "DewPoint",
@@ -972,7 +965,6 @@ local ProviderMap = {
 						["wind_deg"] =  "WindBearing",
 						["wind_speed"] = "WindSpeed",
 						["wind_gust"] = "WindGust"
---						[""] = "WindGustTime"
 					}
 				}
 				local iconMap = {
