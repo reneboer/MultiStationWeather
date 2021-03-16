@@ -39,6 +39,7 @@ The forecast data is refreshed only 5 past each hour even if the update interval
 ### OpenWeather
 Home page : www.openweathermap.org
 This is a good replacement for DarkSky. You can get a free provider key that allows for 1M requests per month, more than sufficient for this use.
+Note that the Standard units will report the temperature in Kelvin, so you probably want to make sure to select Metric or Imperial.
 
 ### Accu Weather
 Home page : www.accuweather.com
