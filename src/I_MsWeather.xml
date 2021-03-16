@@ -2,7 +2,7 @@
 <!-- 
 	Module I_MsWeather.xml
 	Written by R.Boer. 
-	V0.1, 15 February 2021
+	V0.2, 17 March 2021
 -->
 <implementation>
 	<specVersion>
@@ -17,43 +17,7 @@
 	<startup>init</startup>
 	<actionList>
 		<action>
-			<serviceId>urn:upnp-micasaverde-com:serviceId:Weather1</serviceId>
-			<name>SetUnits</name>
-			<run>
-				var.Set("Units", (lul_settings.newUnits or "auto"))
-			</run>
-		</action>
-		<action>
-			<serviceId>urn:upnp-micasaverde-com:serviceId:Weather1</serviceId>
-			<name>SetLocation</name>
-			<run>
-				var.Set("Latitude", (lul_settings.newLatitude or ""))
-				var.Set("Longitude", (lul_settings.newLongitude or ""))
-			</run>
-		</action>
-		<action>
-			<serviceId>urn:upnp-micasaverde-com:serviceId:Weather1</serviceId>
-			<name>SetPeriod</name>
-			<run>
-				var.Set("Period", (lul_settings.newPeriod or "1800"))
-			</run>
-		</action>
-		<action>
-			<serviceId>urn:upnp-micasaverde-com:serviceId:Weather1</serviceId>
-			<name>SetLanguage</name>
-			<run>
-				var.Set("Language", (lul_settings.newLanguage or "en"))
-			</run>
-		</action>
-		<action>
-			<serviceId>urn:upnp-micasaverde-com:serviceId:Weather1</serviceId>
-			<name>SetProviderKey</name>
-			<run>
-				var.Set("Key", (lul_settings.newKey or ""))
-			</run>
-		</action>
-		<action>
-			<serviceId>urn:upnp-micasaverde-com:serviceId:Weather1</serviceId>
+			<serviceId>urn:upnp-rboer-com:serviceId:Weather1</serviceId>
 			<name>SetLogLevel</name>
 			<run>
 				MS_SetLogLevel(lul_settings.newLogLevel or "1")

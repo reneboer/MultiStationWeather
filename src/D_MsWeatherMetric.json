@@ -3,7 +3,7 @@
     "state_icons":[
 		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_0.png", 
 			"conditions": [ 
-				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+				{ 	"service": "urn:upnp-rboer-com:serviceId:Weather1", 
 					"variable": "IconSet", 
 					"operator": "==","value": 0 
 				} 
@@ -11,7 +11,7 @@
 		},
 		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_25.png", 
 			"conditions": [ 
-				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+				{ 	"service": "urn:upnp-rboer-com:serviceId:Weather1", 
 					"variable": "IconSet", 
 					"operator": "==","value": 1 
 				} 
@@ -19,7 +19,7 @@
 		},
 		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_50.png", 
 			"conditions": [ 
-				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+				{ 	"service": "urn:upnp-rboer-com:serviceId:Weather1", 
 					"variable": "IconSet", 
 					"operator": "==","value": 2 
 				} 
@@ -27,7 +27,7 @@
 		},
 		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_75.png", 
 			"conditions": [ 
-				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+				{ 	"service": "urn:upnp-rboer-com:serviceId:Weather1", 
 					"variable": "IconSet", 
 					"operator": "==","value": 3 
 				} 
@@ -35,7 +35,7 @@
 		},
 		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_100.png", 
 			"conditions": [ 
-				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+				{ 	"service": "urn:upnp-rboer-com:serviceId:Weather1", 
 					"variable": "IconSet", 
 					"operator": "==","value": 4 
 				} 
@@ -43,7 +43,7 @@
 		},
 		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_125.png", 
 			"conditions": [ 
-				{ 	"service": "urn:upnp-micasaverde-com:serviceId:Weather1", 
+				{ 	"service": "urn:upnp-rboer-com:serviceId:Weather1", 
 					"variable": "IconSet", 
 					"operator": "==","value": 5 
 				} 
@@ -51,7 +51,7 @@
 		}
     ],
     "DisplayStatus": {
-        "Service": "urn:upnp-micasaverde-com:serviceId:Weather1",
+        "Service": "urn:upnp-rboer-com:serviceId:Weather1",
         "Variable": "IconSet",
         "MinValue": "0",
         "MaxValue": "10"
@@ -199,5 +199,5 @@
             ]
         }
     ],
-	"DeviceType": "urn:schemas-micasaverde-com:device:WeatherMetric:1"
+	"DeviceType": "urn:schemas-rboer-com:device:WeatherMetric:1"
 }

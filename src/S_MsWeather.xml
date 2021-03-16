@@ -19,7 +19,7 @@
 		<stateVariable sendEvents="no"><name>Units</name>						<dataType>string</dataType>	<defaultValue>auto</defaultValue> </stateVariable>
 		<stateVariable sendEvents="no"><name>Language</name>					<dataType>string</dataType>	<defaultValue>en</defaultValue> </stateVariable>
 		<stateVariable sendEvents="no"><name>LogLevel</name>					<dataType>ui2</dataType>	<defaultValue>1</defaultValue></stateVariable>
-		<stateVariable sendEvents="yes"><name>icon</name>						<dataType>string</dataType>	</stateVariable>
+		<stateVariable sendEvents="yes"><name>Icon</name>						<dataType>ui1</dataType>	</stateVariable>
 		<stateVariable sendEvents="yes"><name>CurrentApparentTemperature</name>	<dataType>float</dataType>	</stateVariable>
 		<stateVariable sendEvents="yes"><name>CurrentTemperature</name>			<dataType>float</dataType>	</stateVariable>
 		<stateVariable sendEvents="yes"><name>CurrentCloudCover</name>			<dataType>ui1</dataType>	</stateVariable>
@@ -74,61 +74,6 @@
 		<stateVariable sendEvents="no"><name>TomorrowuvIndex</name>				<dataType>ui2</dataType>	</stateVariable>
 	</serviceStateTable>
 	<actionList>
-		<action>
-			<name>SetUnits</name>
-			<argumentList>
-				<argument>
-					<name>newUnits</name>
-					<direction>in</direction>
-					<relatedStateVariable>Units</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>SetLocation</name>
-			<argumentList>
-				<argument>
-					<name>newLatitude</name>
-					<direction>in</direction>
-					<relatedStateVariable>Latitude</relatedStateVariable>
-				</argument>
-				<argument>
-					<name>newLongitude</name>
-					<direction>in</direction>
-					<relatedStateVariable>Longitude</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>SetPeriod</name>
-			<argumentList>
-				<argument>
-					<name>newPeriod</name>
-					<direction>in</direction>
-					<relatedStateVariable>Period</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>SetLanguage</name>
-			<argumentList>
-				<argument>
-					<name>newLanguage</name>
-					<direction>in</direction>
-					<relatedStateVariable>Language</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
-		<action>
-			<name>SetProviderKey</name>
-			<argumentList>
-				<argument>
-					<name>newKey</name>
-					<direction>in</direction>
-					<relatedStateVariable>Key</relatedStateVariable>
-				</argument>
-			</argumentList>
-		</action>
 		<action>
 			<name>SetLogLevel</name>
 			<argumentList>

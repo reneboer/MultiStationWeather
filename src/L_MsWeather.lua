@@ -1,71 +1,27 @@
 ABOUT = {
 	NAME = "Multi Weather Station",
-	VERSION = "0.1",
+	VERSION = "0.2",
 	DESCRIPTION = "Multi Weather Station plugin",
 	AUTHOR = "Rene Boer"
 }	
 --[[
 Icons based on Wunderground. Information : https://docs.google.com/document/d/1qpc4QN3YDpGDGGNYVINh7tfeulcZ4fxPSC5f4KzpR_U/edit
 
-
-Alternative 1:
-https://openweathermap.org/api
-
-
+Version 0.2 2021-03-16 - Beta version for public testing
 Version 0.1 2021-02-25 - Alpha version for testing
-
-An API key is required for the following Weather Providers:
-	- DarkSky
-	- Accu Weather
-	- Open Weather
-Usefull if you have a PWS
-	- Weather Underground
-	- PWSWeather + 
-
-Access with a key is to:
-	- Buien radar (NL)
-	
-To look at 
-- Melbourne Weather
-http://reg.bom.gov.au/fwo/IDV60901/IDV60901.94870.json
-observations.header[1].refresh_message
-observations.data[1].air_temp
-observations.data[1].dewpt
-observations.data[1].press
-observations.data[1].rel_hum
-observations.data[1].wind_spd_kmh
-observations.data[1].wind_dir
-observations.data[1].gust_kmh
-
-NWS Demo
-https://api.weather.gov/stations/KFFC/observations/latest
-"Headers": "User-Agent: (Vera, CHANGEME-YOUR-EMAIL-HERE)"
-properties.temperature.value * 1.8 + 32
-round(response.properties.windSpeed.value * 2.237,1)
-round(response.properties.windGust.value * 2.237,1)
-response.properties.barometricPressure.value / 100
-response.properties.maxTemperatureLast24Hours.value * 1.8 + 32
-response.properties.minTemperatureLast24Hours.value * 1.8 + 32
-response.properties.precipitationLastHour.value
-
-Swedish Weather (Andr)
-https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/16.158/lat/58.5812/data.json
-first( select( response.timeSeries[1].parameters, \"name\", \"t\" ).values )
-first( select( response.timeSeries[1].parameters, \"name\", \"r\" ).values )
-first( select( response.timeSeries[1].parameters, \"name\", \"wd\" ).values )
-first( select( response.timeSeries[1].parameters, \"name\", \"ws\" ).values )
 
 --]]
 
 -- plugin general variables
 local https = require("ssl.https")
 local ltn12 = require("ltn12")
-local dkjson 	= require("dkjson")
-local cjson		= nil
-if pcall(require, "cjson") then
+local dkjson = require("dkjson")
+local cjson	= nil
+pcall(function ()
 	-- Install via LuaRocks: luarocks install lua-cjson
-	cjson		= require("cjson")
-end
+	cjson	= require("cjson")
+	if not cjson.decode then cjson = nil end
+end)
 local zlib = nil
 pcall(function()
 	-- Install package: sudo apt-get install lua-zlib
@@ -73,7 +29,7 @@ pcall(function()
 	if not zlib.inflate then zlib = nil end
 end)
 
-local SID_Weather 	= "urn:upnp-micasaverde-com:serviceId:Weather1"
+local SID_Weather 	= "urn:upnp-rboer-com:serviceId:Weather1"
 local SID_Security 	= "urn:micasaverde-com:serviceId:SecuritySensor1"
 local SID_Humid 	= "urn:micasaverde-com:serviceId:HumiditySensor1"
 local SID_UV	 	= "urn:micasaverde-com:serviceId:LightSensor1"
@@ -115,15 +71,15 @@ local static_Vars = "|IconsProvider|Documentation|Version|"
 local VariablesMap = {
 	currently = {
 		["CurrentApparentTemperature"] = {decimal = 1, childKey = "A", childID = nil},
-		["CurrentCloudCover"] = {multiplier = 100, childKey = "C", childID = nil},
+		["CurrentCloudCover"] = {decimal = 0, childKey = "C", childID = nil},
 		["CurrentDewPoint"] = {decimal = 1, childKey = "D", initVal = 0, childID = nil},
-		["CurrentHumidity"] = {multiplier = 100, decimal = 0, childKey = "H", childID = nil},
+		["CurrentHumidity"] = {decimal = 0, childKey = "H", childID = nil},
 		["Icon"] = {},
 		["CurrentOzone"] = {childKey = "O", childID = nil},
 		["CurrentuvIndex"] = {childKey = "U", childID = nil},
 		["CurrentVisibility"] = {decimal = 3, childKey = "V", childID = nil},
 		["CurrentPrecipIntensity"] = {},
-		["CurrentPrecipProbability"] = {multiplier = 100, childKey = "R", childID = nil},
+		["CurrentPrecipProbability"] = {decimal = 0, childKey = "R", childID = nil},
 		["CurrentPrecipType"] = {},
 		["CurrentPressure"] = {decimal = 0, childKey = "P", childID = nil},
 		["CurrentConditions"] = {},
@@ -145,7 +101,7 @@ local VariablesMap = {
 		["Visibility"] = {decimal = 3},
 		["PrecipIntensity"] = {},
 		["PrecipIntensityMax"] = {},
-		["PrecipProbability"] = {multiplier = 100},
+		["PrecipProbability"] = {decimal = 0},
 		["PrecipType"] = {},
 		["MaxTemp"] = {decimal = 1},
 		["MinTemp"] = {decimal = 1},
@@ -154,14 +110,13 @@ local VariablesMap = {
 		["ApparentMaxTemp"] = {decimal = 1},
 		["ApparentMinTemp"] = {decimal = 1},
 		["Icon"] = {},
-		["CloudCover"] = {multiplier = 100},
+		["CloudCover"] = {decimal = 0},
 		["DewPoint"] = {decimal = 1},
-		["Humidity"] = {multiplier = 100, decimal = 0},
+		["Humidity"] = {decimal = 0},
 		["WindDirection"] =  {},
 		["WindBearing"] =  {},
 		["WindSpeed"] = {decimal = 1},
 		["WindGust"] = {decimal = 1},
-		["WindGustTime"] = {},
 		["SunChange"] = {}
 	}
 }
@@ -446,7 +401,6 @@ local taskHandle = -1
 	end
 	_G.logAPI_clearTask = logAPI_clearTask
 	
-	
 	return {
 		Initialize = _init,
 		Error = _error,
@@ -590,15 +544,15 @@ local ProviderMap = {
 				local PR_VariablesMap = {
 					currently = { 
 						["apparentTemperature"] = "CurrentApparentTemperature",
-						["cloudCover"] = "CurrentCloudCover",
+						["cloudCover"] = { name = "CurrentCloudCover", multiplier = 100 },
 						["dewPoint"] = "CurrentDewPoint",
-						["humidity"] = "CurrentHumidity",
+						["humidity"] = { name = "CurrentHumidity", multiplier = 100 },
 						["icon"] = "Icon",
 						["ozone"] = "CurrentOzone",
 						["uvIndex"] = "CurrentuvIndex",
 						["visibility"] = "CurrentVisibility",
 						["precipIntensity"] = "CurrentPrecipIntensity",
-						["precipProbability"] = "CurrentPrecipProbability",
+						["precipProbability"] = { name = "CurrentPrecipProbability", multiplier = 100 },
 						["precipType"] = "CurrentPrecipType",
 						["pressure"] = "CurrentPressure",
 						["summary"] = "CurrentConditions",
@@ -617,7 +571,7 @@ local ProviderMap = {
 						["visibility"] = "Visibility",
 						["precipIntensity"] = "PrecipIntensity",
 						["precipIntensityMax"] = "PrecipIntensityMax",
-						["precipProbability"] = "PrecipProbability",
+						["precipProbability"] = { name = "PrecipProbability", multiplier = 100 },
 						["precipType"] = "PrecipType",
 						["temperatureMax"] = "MaxTemp",
 						["temperatureMin"] = "MinTemp",
@@ -626,13 +580,12 @@ local ProviderMap = {
 						["apparentTemperatureMax"] = "ApparentMaxTemp",
 						["apparentTemperatureMin"] = "ApparentMinTemp",
 						["icon"] = "Icon",
-						["cloudCover"] = "CloudCover",
+						["cloudCover"] = { name = "CloudCover", multiplier = 100 },
 						["dewPoint"] = "DewPoint",
-						["humidity"] = "Humidity",
+						["humidity"] = { name = "Humidity", multiplier = 100 },
 						["windBearing"] =  "WindBearing",
 						["windSpeed"] = "WindSpeed",
-						["windGust"] = "WindGust",
-						["windGustTime"] = "WindGustTime"
+						["windGust"] = "WindGust"
 					},
 					daily_summary = "WeekConditions",
 					flags_units = "ReportedUnits"
@@ -661,9 +614,18 @@ local ProviderMap = {
 					varContainer.currently = {}
 					local vc_cur = varContainer.currently
 					for tkey, varName in pairs(PR_VariablesMap.currently) do
+						local mult = nil
+						if type(varName) == "table" then
+							mult = varName.multiplier
+							varName = varName.name
+						end
 						local value = curItems[tkey]
 						if value then
-							if varName == "Icon" then value = iconMap[value] or 44 end
+							if varName == "Icon" then 
+								value = iconMap[value] or 44
+							elseif mult then
+								value = tonumber(value) * mult
+							end
 							ti(vc_cur, {varName, value})
 						else
 							log.Debug("Currently key not found %s",tkey)
@@ -688,9 +650,18 @@ local ProviderMap = {
 						if curDay then
 							varContainer.forecast[fd] = {}
 							for tkey, varName in pairs(PR_VariablesMap.forecast) do
+								local mult = nil
+								if type(varName) == "table" then
+									mult = varName.multiplier
+									varName = varName.name
+								end
 								local value = curDay[tkey]
 								if value then
-									if varName == "Icon" then value = iconMap[value] or 44 end
+									if varName == "Icon" then 
+										value = iconMap[value] or 44
+									elseif mult then
+										value = tonumber(value) * mult
+									end
 									ti(varContainer.forecast[fd], {varName, value})
 								else
 									log.Debug("Daily %d key %s not found",fd,tkey)
@@ -884,6 +855,11 @@ local ProviderMap = {
 							local value = fc_key_map(fd, tkey, data)
 							if value then
 								ti(varContainer.forecast[fd], {varName, value})
+								if fd == 1 then
+									if varName == "Icon" and (not varContainer.currently[varName]) then
+										ti(varContainer.currently, {varName, value})
+									end
+								end
 							else
 								log.Debug("Daily %d key %s not found",fd,tkey)
 							end 
@@ -1617,7 +1593,7 @@ local ProviderMap = {
 local function setvariables(variable, varmap, value, prefix)
 	if not prefix then prefix = "" end
 	if varmap.pattern then value = string.gsub(value, varmap.pattern, "") end
-	if varmap.multiplier then value = value * varmap.multiplier end
+--	if varmap.multiplier then value = value * varmap.multiplier end
 	if varmap.decimal then value = math.floor(value * 10^varmap.decimal + .5) / 10^varmap.decimal end
 	var.Set(prefix..variable, value, varmap.serviceId)
 	if varmap.childID then -- we update the child device as well
@@ -1927,12 +1903,6 @@ function init(lul_device)
 	var.Default("LogLevel", 1)
 	log.Initialize(ABOUT.NAME, var.GetNumber("LogLevel"), (utils.GetUI() == utils.IsOpenLuup or utils.GetUI() == utils.IsUI5))
 	log.Info("device startup")
-	-- Does no longer run on Lite and older models as tlsv1.2 is required
---	if (utils.GetUI() ~= utils.IsOpenLuup) and (not luup.model) then
---		var.Set("DisplayLine1", "Vera model not supported.", SID_AltUI)
---		utils.SetLuupFailure(0, this_device)
---		return false, "Plug-in is not supported on this Vera.", ABOUT.NAME
---	end
 	check_param_updates()
 	createchildren(this_device)
 	-- See if user disabled plug-in 
@@ -1947,6 +1917,10 @@ function init(lul_device)
 	var.Default("LastPollTS", 0)
 	if MS.Provider > 0 then
 		if ProviderMap[MS.Provider].init() then
+			local curMsg = var.Get("DisplayLine1", SID_AltUI)
+			if curMsg == "Complete settings first." then
+				var.Set("DisplayLine1", "Waiting for first update...", SID_AltUI)
+			end
 			luup.call_delay ("Weather_delay_callback", 10)
 			log.Info("device started")
 			luup.set_failure (0)                        -- all's well with the world

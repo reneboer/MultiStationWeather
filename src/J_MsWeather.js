@@ -2,28 +2,24 @@
 /* 
 	MsWeather Hub Control UI
 	Written by R.Boer. 
-	V0.1 20 February 2021
-	
-	Weather providers to look at:
-		weatherstack.com
-		ambientweather.net
+	V0.2 16 March 2021
 */
 var MsWeather = (function (api) {
 
 	// Constants. Keep in sync with LUA code.
     var _uuid = '12021512-0000-a0a0-b0b0-c0c030303032';
-	var SID_Weather = "urn:upnp-micasaverde-com:serviceId:Weather1";
+	var SID_Weather = "urn:upnp-rboer-com:serviceId:Weather1";
 	var DIV_PREFIX = "rbMsWeather_";	// Used in HTML div IDs to make them unique for this module
 	var MOD_PREFIX = "MsWeather";  		// Must match module name above
 	var bOnALTUI = false;
 	var providersConf = [				// Provider configurations.
 		{ id:1, name:'DarkSky', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['auto','si','us','ca','uk2'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[1,2,3,4,5,6,7,8,9,10], period:[300,3600] },
-		{ id:2, name:'Weather Underground', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','s','h'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[1,2,3,4,5,6,7,8,9,10],period:[60,3600] },
-		{ id:3, name:'OpenWeather', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['metric','imperial','standard'], language:true, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,9,10],period:[60,3600] },
+		{ id:2, name:'Weather Underground', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','s','h'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[2,3,4,5,6,7,8,9,10],period:[60,3600] },
+		{ id:3, name:'OpenWeather', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['metric','imperial','standard'], language:true, childTypes:'TDHPAUWR', displayTypes:[1,2,3,4,6,7,9,10],period:[60,3600] },
 		{ id:4, name:'Accu Weather', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','h'], language:true, childTypes:'TAUWR', displayTypes:[1,3,4,6,7,8,9],period:[1800,3600,7200] },
 		{ id:5, name:'AmbientWeather', active:true, key:true, appkey:true, latlon:false, station:'StationList,0,Device 1', fcDays:7, units:['imperial'], language:false, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,10],period:[10,3600] },
 		{ id:6, name:'PWS Weather', active:false, key:true, appkey:true, latlon:false, station:'StationList,0,Device 1', fcDays:7, units:['imperial'], language:false, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,10],period:[10,3600] },
-		{ id:312, name:'Buienradar (NL)', active:true, key:false, appkey:false, latlon:false, station:'StationList,6260,Meetstation De Bilt', fcDays:5, units:false, language:false, childTypes:'THPAU', displayTypes:[1,2,3,4,6,7],period:[60,3600] }
+		{ id:312, name:'Buienradar (NL)', active:true, key:false, appkey:false, latlon:false, station:'StationList,6260,Meetstation De Bilt', fcDays:5, units:false, language:false, childTypes:'THPAUV', displayTypes:[1,2,3,4,6,7],period:[60,3600] }
 	];
 	var forecastOptions = [{v:0,l:'No forecast'},{v:1,l:'One day'},{v:2,l:'Two days'},{v:3,l:'Three days'},{v:4,l:'Four days'},{v:5,l:'Five days'},{v:6,l:'Six days'},{v:7,l:'Seven days'}];
 	var periodOptions = [{v:60,l:'1 minute'},{v:300,l:'5 minutes'},{v:900,l:'15 minutes'},{v:1800,l:'30 minutes'},{v:3600,l:'1 hour'},{v:7200,l:'2 hours'},{v:10800,l:'3 hours'}];
@@ -131,7 +127,6 @@ var MsWeather = (function (api) {
 		var pl = providersConf.length;
 		var provCnf = null;
 		for(i=0;i<pl;i++){
-			var provCnf = providersConf[i];
 			if (providersConf[i].id == prv) {
 				provCnf = providersConf[i];
 				break;
@@ -303,7 +298,14 @@ var MsWeather = (function (api) {
 				}
 			}
 		} else {
-			Utils.logError(MOD_PREFIX+': UpdateDisplay(): Undefined provider');
+			// No provider selected, hide fields.
+			$('#'+DIV_PREFIX+deviceID+"div_key").fadeOut();
+			$('#'+DIV_PREFIX+deviceID+"div_appkey").fadeOut();
+			$('#'+DIV_PREFIX+deviceID+"div_latlon").fadeOut();
+			$('#'+DIV_PREFIX+deviceID+"div_units").fadeOut();
+			$('#'+DIV_PREFIX+deviceID+"div_language").fadeOut();
+			$('#'+DIV_PREFIX+deviceID+"div_station_n").fadeOut(); 
+			$('#'+DIV_PREFIX+deviceID+"div_station_i").fadeOut(); 
 		}
 	}
 	function _UpdateSettings(deviceID) {

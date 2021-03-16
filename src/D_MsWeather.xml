@@ -2,7 +2,7 @@
 <!-- 
 	Module D_MsWeather.xml
 	Written by R.Boer. 
-	V0.1, 15 February 2021
+	V0.2, 17 March 2021
 -->
 <root xmlns="urn:schemas-upnp-org:device-1-0">
 	<specVersion>
@@ -10,7 +10,7 @@
 		<minor>0</minor>
 	</specVersion>
 	<device>
-		<deviceType>urn:schemas-micasaverde-com:device:Weather:1</deviceType>
+		<deviceType>urn:schemas-rboer-com:device:Weather:1</deviceType>
 		<staticJson>D_MsWeather.json</staticJson>
 		<friendlyName>Multi Weather Station</friendlyName>
 		<manufacturer>Rene Boer</manufacturer>
@@ -23,8 +23,8 @@
 		<UDN></UDN>
 		<serviceList>
 			<service>
-				<serviceType>urn:schemas-micasaverde-com:service:Weather:1</serviceType>
-				<serviceId>urn:upnp-micasaverde-com:serviceId:Weather1</serviceId>
+				<serviceType>urn:schemas-rboer-com:service:Weather:1</serviceType>
+				<serviceId>urn:upnp-rboer-com:serviceId:Weather1</serviceId>
 				<SCPDURL>S_MsWeather.xml</SCPDURL>
 			</service>
 		</serviceList>

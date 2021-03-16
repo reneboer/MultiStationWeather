@@ -9,7 +9,7 @@
 		<minor>0</minor>
 	</specVersion>
 	<device>
-		<deviceType>urn:schemas-micasaverde-com:device:WeatherMetric:1</deviceType>
+		<deviceType>urn:schemas-rboer-com:device:WeatherMetric:1</deviceType>
 		<Category_Num>12</Category_Num>
 		<SubCategory_Num>0</SubCategory_Num>
 		<staticJson>D_MsWeatherMetric.json</staticJson> 
