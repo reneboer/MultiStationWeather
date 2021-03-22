@@ -16,7 +16,7 @@ For the icons and the Icon variable to the values from [The Weather Company](htt
 ## Installation
 Install the plugin from either the ALTUI AppStore or from the Mios App Market.
 
-For openLuup it is reccomended to install cjson (luarocks install lua-cjson) and zlib (sudo apt-get install lua-zlib). This will give some better performance on the sometimes large sets of data returned.
+For openLuup it is recommended to install cjson (luarocks install lua-cjson) and zlib (sudo apt-get install lua-zlib). This will give some better performance on the, sometimes, large sets of data returned.
 
 ## Settings
 First select the Weather provider you want to use and if needed have an access key for. Selecting the weather provider will display all settings relevant.
