@@ -2,20 +2,21 @@
 /* 
 	MsWeather Hub Control UI
 	Written by R.Boer. 
-	V0.2 16 March 2021
+	V1.0 17 March 2021
 */
 var MsWeather = (function (api) {
 
 	// Constants. Keep in sync with LUA code.
     var _uuid = '12021512-0000-a0a0-b0b0-c0c030303032';
 	var SID_Weather = "urn:upnp-rboer-com:serviceId:Weather1";
+	var SID_ALTUI = "urn:upnp-org:serviceId:altui1";
 	var DIV_PREFIX = "rbMsWeather_";	// Used in HTML div IDs to make them unique for this module
 	var MOD_PREFIX = "MsWeather";  		// Must match module name above
 	var bOnALTUI = false;
 	var providersConf = [				// Provider configurations.
 		{ id:1, name:'DarkSky', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['auto','si','us','ca','uk2'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[1,2,3,4,5,6,7,8,9,10], period:[300,3600] },
 		{ id:2, name:'Weather Underground', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','s','h'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[2,3,4,5,6,7,8,9,10],period:[60,3600] },
-		{ id:3, name:'OpenWeather', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['metric','imperial','standard'], language:true, childTypes:'TDHPAUWR', displayTypes:[1,2,3,4,6,7,9,10],period:[60,3600] },
+		{ id:3, name:'OpenWeather', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['metric','imperial','standard'], language:true, childTypes:'TDHPAUWR', displayTypes:[1,2,3,4,6,7,8,9,10],period:[60,3600] },
 		{ id:4, name:'Accu Weather', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','h'], language:true, childTypes:'TAUWR', displayTypes:[1,3,4,6,7,8,9],period:[1800,3600,7200] },
 		{ id:5, name:'AmbientWeather', active:true, key:true, appkey:true, latlon:false, station:'StationList,0,Device 1', fcDays:7, units:['imperial'], language:false, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,10],period:[10,3600] },
 		{ id:6, name:'PWS Weather', active:false, key:true, appkey:true, latlon:false, station:'StationList,0,Device 1', fcDays:7, units:['imperial'], language:false, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,10],period:[10,3600] },
@@ -344,7 +345,7 @@ var MsWeather = (function (api) {
 		var chDev = htmlGetPulldownSelection(deviceID, 'ChildDev');
 		varSet(deviceID,'ChildDev',(typeof chDev === 'object')?chDev.join():chDev);
 		varSet(deviceID,'LogLevel',htmlGetPulldownSelection(deviceID, 'LogLevel'));
-
+		varSet(deviceID,'DisplayLine1','Waiting for Luup reload', SID_ALTUI);
 		application.sendCommandSaveUserData(true);
 		setTimeout(function() {
 			doReload(deviceID);

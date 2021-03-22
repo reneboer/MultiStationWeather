@@ -2,8 +2,9 @@
 <!-- 
 	Module D_MsWeatherMetric.xml
 	Written by R.Boer. 
-	V0.1, 15 Februari 2021
---><root xmlns="urn:schemas-upnp-org:device-1-0">
+	V1.0, 22 March 2021
+-->
+<root xmlns="urn:schemas-upnp-org:device-1-0">
 	<specVersion>
 		<major>1</major>
 		<minor>0</minor>

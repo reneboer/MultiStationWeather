@@ -1,12 +1,13 @@
 ABOUT = {
 	NAME = "Multi Weather Station",
-	VERSION = "0.2",
+	VERSION = "1.0",
 	DESCRIPTION = "Multi Weather Station plugin",
 	AUTHOR = "Rene Boer"
 }	
 --[[
 Icons based on Wunderground. Information : https://docs.google.com/document/d/1qpc4QN3YDpGDGGNYVINh7tfeulcZ4fxPSC5f4KzpR_U/edit
 
+Version 1.0 2021-03-17 - First GA version
 Version 0.2 2021-03-16 - Beta version for public testing
 Version 0.1 2021-02-25 - Alpha version for testing
 
@@ -53,9 +54,9 @@ local MS = {
 	StationName = "",
 	Period = 1800,	-- data refresh interval in seconds
 	Units = "auto",
+	ForecastDays = 2,
 	DispLine1 = 1,
 	DispLine2 = 2,
-	ForecastDays = 2,
 	ChildDev = "",
 	RainSensor = 0,  -- Can support rain alarm for US,CA,UK (for NL we could use buienradar).
 	Language = "en", -- default language
@@ -504,6 +505,27 @@ local function HttpsGet(strURL)
 	end
 end
 
+-- Insert found value into table
+local function insert_value(vc_cur, varName, value, iconMap)
+	local ti = table.insert
+	local mult = nil
+	if type(varName) == "table" then
+		mult = varName.multiplier
+		varName = varName.name
+	end
+	if value then
+		if mult then
+			value = tonumber(value) * mult
+		elseif varName == "Icon" and iconMap then 
+			value = iconMap[value] or 44
+		end
+		ti(vc_cur, {varName, value})
+		return true
+	else
+		return false
+	end
+end
+
 -- Table of Weather providers with init and update functions
 -- Must match providerMap in J_MsWeather.js
 local ProviderMap = {
@@ -567,7 +589,6 @@ local ProviderMap = {
 						["summary"] = "Conditions",
 						["ozone"] = "Ozone",
 						["uvIndex"] = "uvIndex",
-						["uvIndexTime"] = "uvIndexTime",
 						["visibility"] = "Visibility",
 						["precipIntensity"] = "PrecipIntensity",
 						["precipIntensityMax"] = "PrecipIntensityMax",
@@ -614,20 +635,7 @@ local ProviderMap = {
 					varContainer.currently = {}
 					local vc_cur = varContainer.currently
 					for tkey, varName in pairs(PR_VariablesMap.currently) do
-						local mult = nil
-						if type(varName) == "table" then
-							mult = varName.multiplier
-							varName = varName.name
-						end
-						local value = curItems[tkey]
-						if value then
-							if varName == "Icon" then 
-								value = iconMap[value] or 44
-							elseif mult then
-								value = tonumber(value) * mult
-							end
-							ti(vc_cur, {varName, value})
-						else
+						if not insert_value(vc_cur, varName, curItems[tkey], iconMap) then
 							log.Debug("Currently key not found %s",tkey)
 						end     
 					end
@@ -649,21 +657,9 @@ local ProviderMap = {
 						local curDay = data.daily.data[fd]
 						if curDay then
 							varContainer.forecast[fd] = {}
+							local vc_for = varContainer.forecast[fd]
 							for tkey, varName in pairs(PR_VariablesMap.forecast) do
-								local mult = nil
-								if type(varName) == "table" then
-									mult = varName.multiplier
-									varName = varName.name
-								end
-								local value = curDay[tkey]
-								if value then
-									if varName == "Icon" then 
-										value = iconMap[value] or 44
-									elseif mult then
-										value = tonumber(value) * mult
-									end
-									ti(varContainer.forecast[fd], {varName, value})
-								else
+								if not insert_value(vc_for, varName, curDay[tkey], iconMap) then
 									log.Debug("Daily %d key %s not found",fd,tkey)
 								end     
 							end
@@ -775,7 +771,6 @@ local ProviderMap = {
 					end 
 					return value
 				end
-				local ti = table.insert
 				local varContainer = {}
 				-- Get the currently values we are interested in.
 				local curItems = data.observations[1]
@@ -785,9 +780,7 @@ local ProviderMap = {
 					for tkey, varName in pairs(PR_VariablesMap.currently) do
 						-- See if complex mapping is needed
 						local value = key_map(tkey, curItems)
-						if value then
-							ti(vc_cur, {varName, value})
-						else
+						if not insert_value(vc_cur, varName, value) then
 							log.Debug("Currently key not found %s",tkey)
 						end
 					end
@@ -850,11 +843,11 @@ local ProviderMap = {
 					varContainer.forecast = {}
 					for fd = 1, MS.ForecastDays do
 						varContainer.forecast[fd] = {}
+						local vc_for = varContainer.forecast[fd]
 						for tkey, varName in pairs(PR_VariablesMap.forecast) do
 							-- See if complex mapping is needed
 							local value = fc_key_map(fd, tkey, data)
-							if value then
-								ti(varContainer.forecast[fd], {varName, value})
+							if insert_value(vc_for, varName, value) then
 								if fd == 1 then
 									if varName == "Icon" and (not varContainer.currently[varName]) then
 										ti(varContainer.currently, {varName, value})
@@ -922,7 +915,6 @@ local ProviderMap = {
 						["weather.description"] = "Conditions",
 --						[""] = "Ozone",
 						["uvi"] = "uvIndex",
---						[""] = "uvIndexTime",
 						["visibility"] = "Visibility",
 						["rain|snow"] = "PrecipIntensity",
 --						[""] = "PrecipIntensityMax",
@@ -999,7 +991,6 @@ local ProviderMap = {
 					end 
 					return value
 				end
-				local ti = table.insert
 				local varContainer = {}
 				-- Get the currently values we are interested in.
 				local curItems = data.current
@@ -1009,10 +1000,7 @@ local ProviderMap = {
 					for tkey, varName in pairs(PR_VariablesMap.currently) do
 						-- See if complex mapping is needed
 						local value = key_map(tkey, curItems)
-						if value then
-							if varName == "Icon" then value = iconMap[value] or 44 end
-							ti(vc_cur, {varName, value})
-						else
+						if not insert_value(vc_cur, varName, value, iconMap) then
 							log.Debug("Currently key not found %s",tkey)
 						end
 					end
@@ -1026,13 +1014,11 @@ local ProviderMap = {
 						local curDay = data.daily[fd]
 						if curDay then
 							varContainer.forecast[fd] = {}
+							local vc_for = varContainer.forecast[fd]
 							for tkey, varName in pairs(PR_VariablesMap.forecast) do
 								-- See if complex mapping is needed
 								local value = key_map(tkey, curDay)
-								if value then
-									if varName == "Icon" then value = iconMap[value] or 44 end
-									ti(varContainer.forecast[fd], {varName, value})
-								else
+								if not insert_value(vc_for, varName, value, iconMap) then
 									log.Debug("Daily %d key %s not found",fd,tkey)
 								end 
 							end
@@ -1127,7 +1113,6 @@ local ProviderMap = {
 						["Day.ShortPhrase"] = "Conditions",
 --						[""] = "Ozone",
 --						[""] = "uvIndex",
---						[""] = "uvIndexTime",
 --						[""] = "Visibility",
 						["Day.PrecipitationIntensity"] = "PrecipIntensity",
 						["Day.TotalLiquid.Value"] = "PrecipIntensityMax",
@@ -1226,7 +1211,6 @@ local ProviderMap = {
 					end 
 					return value
 				end
-				local ti = table.insert
 				local varContainer = {}
 				-- Get the currently values we are interested in.
 				local curItems = data[1]
@@ -1236,10 +1220,7 @@ local ProviderMap = {
 					for tkey, varName in pairs(PR_VariablesMap.currently) do
 						-- See if complex mapping is needed
 						local value = key_map(tkey, curItems)
-						if value then
-							if varName == "Icon" then value = iconMap[value] or 44 end
-							ti(vc_cur, {varName, value})
-						else
+						if not insert_value(vc_cur, varName, value, iconMap) then
 							log.Debug("Currently key not found %s",tkey)
 						end
 					end
@@ -1278,13 +1259,11 @@ local ProviderMap = {
 						local curDay = data.DailyForecasts[fd]
 						if curDay then
 							varContainer.forecast[fd] = {}
+							local vc_for = varContainer.forecast[fd]
 							for tkey, varName in pairs(PR_VariablesMap.forecast) do
 								-- See if complex mapping is needed
 								local value = key_map(tkey, curDay)
-								if value then
-									if varName == "Icon" then value = iconMap[value] or 44 end
-									ti(varContainer.forecast[fd], {varName, value})
-								else
+								if not insert_value(vc_for, varName, value, iconMap) then
 									log.Debug("Daily %d key %s not found",fd,tkey)
 								end 
 							end
@@ -1354,7 +1333,6 @@ local ProviderMap = {
 					log.Error("AmbientWeather API json decode error = %s", tostring(err)) 
 					return false, "Invalid data"
 				end
-				local ti = table.insert
 				local varContainer = {}
 				-- Get station/devices list
 				local stationID = MS.StationID
@@ -1378,10 +1356,7 @@ local ProviderMap = {
 					local vc_cur = varContainer.currently
 					for tkey, varName in pairs(PR_VariablesMap.currently) do
 						local value = curItems[tkey]
-						if value then
---							if varName == "Icon" then value = iconMap[value] or 44 end
-							ti(vc_cur, {varName, value})
-						else
+						if not insert_value(vc_cur, varName, value) then
 							log.Debug("Currently key not found %s",tkey)
 						end     
 					end
@@ -1442,8 +1417,8 @@ local ProviderMap = {
 						["feeltemperature"] = "CurrentApparentTemperature",
 						["humidity"] = "CurrentHumidity",
 						["graphUrl"] = "Icon",
-						["sunpower"] = "CurrentuvIndex",
-						["visibility"] = "CurrentVisibility",
+						["sunpower"] = { name = "CurrentuvIndex", multiplier = 0.01 },
+						["visibility"] = { name = "CurrentVisibility", multiplier = 0.0001 },
 						["precipitation"] = "CurrentPrecipIntensity",
 						["airpressure"] = "CurrentPressure",
 						["temperature"] = "CurrentTemperature",
@@ -1543,18 +1518,16 @@ local ProviderMap = {
 						if value then
 							if tkey == "graphUrl" then
 								-- Map icon url, to icon value
-								local icn_str = string.sub(curItems[tkey], -2)
+								local icn_str = string.sub(value, -2)
 								if string.sub(icn_str,1,1) == "/" then
 									icn_str = string.sub(icn_str,2)
 								end
-								value = iconMap[icn_str] or 44
-							elseif tkey == "visibility" then
-								value = value / 1000
+								value = icn_str
 							elseif tkey == "timestamp" then
 								local y,m,d,h,n,s = string.match(value,"(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)")
 								value = os.time({year=y,month=m,day=d,hour=h,min=n,sec=s})
 							end
-							ti(vc_cur, {varName, value})
+							insert_value(vc_cur, varName, value, iconMap)
 						else
 							log.Debug("Currently key not found %s",tkey)
 						end     
@@ -1569,10 +1542,9 @@ local ProviderMap = {
 						local curDay = data.forecast.fivedayforecast[fd]
 						if curDay then
 							varContainer.forecast[fd] = {}
+							local vc_for = varContainer.forecast[fd]
 							for tkey, varName in pairs(PR_VariablesMap.forecast) do
-								if curDay[tkey] then
-									ti(varContainer.forecast[fd], {varName, curDay[tkey]})
-								else
+								if not insert_value(vc_for, varName, curDay[tkey]) then
 									log.Debug("Daily %d key %s not found",fd,tkey)
 								end     
 							end
@@ -1661,7 +1633,7 @@ local function displayLine(linenum)
 			local val = var.Get(v.var,v.sid)
 			if val ~= '' then
 				if v.var == "LastUpdate" then
-					val = os.date("%c",val)
+					val = os.date("%d %b, %H:%M",val)
 				end
 				ti(txtTab, v.prefix .. val)
 			end    
