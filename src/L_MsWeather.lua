@@ -7,9 +7,29 @@ ABOUT = {
 --[[
 Icons based on Wunderground. Information : https://docs.google.com/document/d/1qpc4QN3YDpGDGGNYVINh7tfeulcZ4fxPSC5f4KzpR_U/edit
 
-Version 1.0 2021-03-17 - First GA version
+Version 1.0 2021-03-17 
+	- First GA version
+	- Change in Display Line settings directly reflected after Luup reload.
+	
 Version 0.2 2021-03-16 - Beta version for public testing
 Version 0.1 2021-02-25 - Alpha version for testing
+
+https://www.visualcrossing.com/resources/documentation/weather-api/how-to-replace-the-dark-sky-api/
+
+
+and at the air quality. So far i only looked at matching what the DarkSky plugin had, but there are indeed some weather providers that have more data, or less for that matter.
+
+Also any plans to add Air Pollution / Air Quality data from the Open Weather Map API here ?
+
+Specifically interested in seeing this data:
+
+    main.aqi Air Quality Index. Possible values: 1, 2, 3, 4, 5. Where 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor.
+
+Additional Information from their webpage:
+
+"Besides basic Air Quality Index, the API returns data about polluting gases, such as Carbon monoxide (CO), Nitrogen monoxide (NO), Nitrogen dioxide (NO2), Ozone (O3), Sulphur dioxide (SO2), Ammonia (NH3), and particulates (PM2.5 and PM10).
+
+Air pollution forecast is available for 5 days with hourly granularity. Historical data is accessible from 27th November 2020"
 
 --]]
 
@@ -77,6 +97,14 @@ local VariablesMap = {
 		["CurrentHumidity"] = {decimal = 0, childKey = "H", childID = nil},
 		["Icon"] = {},
 		["CurrentOzone"] = {childKey = "O", childID = nil},
+		["CurrentCO"] = {},
+		["CurrentNO"] = {},
+		["CurrentNO2"] = {},
+		["CurrentSO2"] = {},
+		["CurrentNH3"] = {},
+		["CurrentPM25"] = {},
+		["CurrentPM10"] = {},
+		["CurrentAirQuality"] = {},
 		["CurrentuvIndex"] = {childKey = "U", childID = nil},
 		["CurrentVisibility"] = {decimal = 3, childKey = "V", childID = nil},
 		["CurrentPrecipIntensity"] = {},
@@ -953,43 +981,45 @@ local ProviderMap = {
 					["50d"] = 20,
 					["50n"] = 20
 				}
-				log.Debug(res)
-				local data, err = json.decode(res)
-				if not data then
-					log.Error("OpenWeather API json decode error = %s", tostring(err)) 
-					return false, "Invalid data"
-				end
 				-- Do nested key mapping
 				local function key_map(tkey, curItems)
 					local value = nil
 					if tkey:find("%.") then
 						-- Nested key in sub key
-						local key1,key2 = tkey:match("([%a_]-)%.([%a_]+)")
-						if key1 and key2 then
-							if key1 == "weather" then
-								value = curItems[key1][1][key2]
-							else
-								value = curItems[key1][key2]
+						local key1,key2 = tkey:match("([%w_]-)%.([%w_]+)")
+						if key1 and key2 then 
+							if curItems[key1] then
+								if key1 == "weather" then
+									value = curItems[key1][1][key2]
+								else
+									value = curItems[key1][key2]
+								end
 							end
 						end
 					elseif tkey:find("|") then
 						if tkey:sub(1,2) == "o|" then
 							-- Use either key as value
-							local key1,key2 = tkey:match("o|([%a_]-)|([%a_]+)")
+							local key1,key2 = tkey:match("o|([%w_]-)|([%w_]+)")
 							if curItems[key1] then
 								value = key1
 							elseif curItems[key2] then
 								value = key2
 							end
 						else
-							-- Get value of either key
-							local key1,key2 = tkey:match("([%a_]-)|([%a_]+)")
-							value = curItems[key1] or curItems[key2]
+							-- Get value of either key. If missing there is none, i.e. zero.
+							local key1,key2 = tkey:match("([%w_]-)|([%w_]+)")
+							value = curItems[key1] or curItems[key2] or 0
 						end
 					else
 						value = curItems[tkey]
 					end 
 					return value
+				end
+				log.Debug(res)
+				local data, err = json.decode(res)
+				if not data then
+					log.Error("OpenWeather API json decode error = %s", tostring(err)) 
+					return false, "Invalid data"
 				end
 				local varContainer = {}
 				-- Get the currently values we are interested in.
@@ -1028,6 +1058,51 @@ local ProviderMap = {
 					end
 				else
 					log.Debug("No forecast data configured")
+				end
+				-- Get Air current quality data.
+				local urltemplate = "https://api.openweathermap.org/data/2.5/air_pollution?lat=%s&lon=%s&appid=%s"
+				local url = string.format(urltemplate, MS.Latitude, MS.Longitude, MS.Key)
+				log.Debug("calling OpenWeather API with url = %s", url)
+				local wdata, retcode, headers, res = HttpsGet(url)
+				local err = (retcode ~=200)
+				if err then -- something wrong happened (website down, wrong key or location)
+					log.Error("OpenWeather API call failed with http code = %s", tostring(retcode))
+					return true, varContainer
+				end
+				-- this is the table used to map any providers output elements with the plugin variables
+				local PR_VariablesMapAQ = {
+					currently = { 
+						["components.o3"] = "CurrentOzone",
+						["components.co"] = "CurrentCO",
+						["components.no"] = "CurrentNO",
+						["components.no2"] = "CurrentNO2",
+						["components.so2"] = "CurrentSO2",
+						["components.nh3"] = "CurrentNH3",
+						["components.pm10"] = "CurrentPM10",
+						["components.pm2_5"] = "CurrentPM25",
+						["main.aqi"] = "CurrentAirQuality"
+					}}
+				log.Debug(res)
+				local data, err = json.decode(res)
+				if not data then
+					log.Error("OpenWeather API json decode error = %s", tostring(err)) 
+					return true, varContainer
+				end
+				-- Get the currently values we are interested in.
+				local curItems = data.list
+				if curItems then curItems = data.list[1] end
+				log.Debug(json.encode(curItems))
+				if curItems then
+					local vc_cur = varContainer.currently
+					for tkey, varName in pairs(PR_VariablesMapAQ.currently) do
+						-- See if complex mapping is needed
+						local value = key_map(tkey, curItems)
+						if not insert_value(vc_cur, varName, value, iconMap) then
+							log.Debug("Currently key not found %s",tkey)
+						end
+					end
+				else
+					log.Warning("No current data")
 				end
 				return true, varContainer
 			end
@@ -1639,9 +1714,10 @@ local function displayLine(linenum)
 			end    
 		end
 		if #txtTab ~= 0 then
-			var.Set("DisplayLine"..linenum, tc(txtTab, ", "), SID_AltUI) 
+			var.Set("DisplayLine"..linenum, tc(txtTab, ", "), SID_AltUI)
 		else
 			log.Warning("No information found for DisplayLine"..linenum)
+			var.Set("DisplayLine"..linenum, "No data", SID_AltUI)
 		end    
 	else
 		log.Warning("No configuration set for DisplayLine"..linenum)
@@ -1782,6 +1858,9 @@ function Weather_delay_callback()
 		MS_GetData() -- get weather data
 	else
 		log.Debug("Skipping poll as last poll was %s seconds ago, within interval of %s.", nextPollTS - lpTS, MS.Period)
+		-- Update display for ALTUI to reflect change in settings.
+		displayLine(1)
+		displayLine(2)
 	end
 end
 
