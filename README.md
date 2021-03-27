@@ -54,7 +54,7 @@ Home page : www.openweathermap.org
 This is a good replacement for DarkSky. You can get a free provider key that allows for 1M requests per month, more than sufficient for this use.
 Note that the Standard units will report the temperature in Kelvin, so you probably want to make sure to select Metric or Imperial.
 
-**Current Weather Variables included**: CurrentApparentTemperature, CurrentCloudCover, CurrentDewPoint, CurrentHumidity, Icon, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPrecipType, CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust
+**Current Weather Variables included**: CurrentApparentTemperature, CurrentCloudCover, CurrentDewPoint, CurrentHumidity, Icon, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPrecipType, CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust, CurrentOzone, CurrentAirQuality, CurrentCO, CurrentNO, CurrentNO2, CurrentSO2, CurrentNH3, CurrentPM25, CurrentPM10
 
 **Forecast Weather Variables included**: Pressure, Conditions, uvIndex, Visibility, PrecipIntensity, PrecipProbability, PrecipType, MaxTemp, MinTemp, HighTemp, LowTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, DewPoint, Humidity, WindBearing, WindSpeed, WindGust
 
