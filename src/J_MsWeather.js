@@ -2,7 +2,7 @@
 /* 
 	MsWeather Hub Control UI
 	Written by R.Boer. 
-	V1.0 17 March 2021
+	V1.0 27 March 2021
 */
 var MsWeather = (function (api) {
 
@@ -16,7 +16,7 @@ var MsWeather = (function (api) {
 	var providersConf = [				// Provider configurations.
 		{ id:1, name:'DarkSky', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['auto','si','us','ca','uk2'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[1,2,3,4,5,6,7,8,9,10], period:[300,3600] },
 		{ id:2, name:'Weather Underground', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','s','h'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[2,3,4,5,6,7,8,9,10],period:[60,3600] },
-		{ id:3, name:'OpenWeather', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['metric','imperial','standard'], language:true, childTypes:'TDHPAUWR', displayTypes:[1,2,3,4,6,7,8,9,10],period:[60,3600] },
+		{ id:3, name:'OpenWeather', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['metric','imperial','standard'], language:true, childTypes:'TDHOPAUWRQX', displayTypes:[1,2,3,4,5,6,7,8,9,10,11,12],period:[60,3600] },
 		{ id:4, name:'Accu Weather', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','h'], language:true, childTypes:'TAUWR', displayTypes:[1,3,4,6,7,8,9],period:[1800,3600,7200] },
 		{ id:5, name:'AmbientWeather', active:true, key:true, appkey:true, latlon:false, station:'StationList,0,Device 1', fcDays:7, units:['imperial'], language:false, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,10],period:[10,3600] },
 		{ id:6, name:'PWS Weather', active:false, key:true, appkey:true, latlon:false, station:'StationList,0,Device 1', fcDays:7, units:['imperial'], language:false, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,10],period:[10,3600] },
@@ -24,8 +24,8 @@ var MsWeather = (function (api) {
 	];
 	var forecastOptions = [{v:0,l:'No forecast'},{v:1,l:'One day'},{v:2,l:'Two days'},{v:3,l:'Three days'},{v:4,l:'Four days'},{v:5,l:'Five days'},{v:6,l:'Six days'},{v:7,l:'Seven days'}];
 	var periodOptions = [{v:60,l:'1 minute'},{v:300,l:'5 minutes'},{v:900,l:'15 minutes'},{v:1800,l:'30 minutes'},{v:3600,l:'1 hour'},{v:7200,l:'2 hours'},{v:10800,l:'3 hours'}];
-	var childDeviceOptions = [{v:'T',l:'Temperature'},{v:'D',l:'Dewpoint'},{v:'H',l:'Humidity'},{v:'P',l:'Pressure'},{v:'A',l:'Apparent Temperature'},{v:'O',l:'Ozone'},{v:'U',l:'UV Index'},{v:'V',l:'Visibility'},{v:'W',l:'Wind Data'},{v:'R',l:'Percipipation Data'}];
-	var displayOptions = [{v:1,l:'Current Conditions'},{v:2,l:'Current Pressure'},{v:3,l:'Last Update'},{v:4,l:'Wind Speed, Gust and Bearing'},{v:5,l:'Ozone and UV Index'},{v:6,l:'Current Temperature'},{v:7,l:'Apparent Temperature'},{v:8,l:'Current Cloud Cover'},{v:9,l:'Percipipation Type, Probability and Intensity'},{v:10,l:'Humidity and Dew Point'}];
+	var childDeviceOptions = [{v:'T',l:'Temperature'},{v:'D',l:'Dewpoint'},{v:'H',l:'Humidity'},{v:'P',l:'Pressure'},{v:'A',l:'Apparent Temperature'},{v:'O',l:'Ozone'},{v:'U',l:'UV Index'},{v:'V',l:'Visibility'},{v:'W',l:'Wind Data'},{v:'R',l:'Percipipation Data'},{v:'Q',l:'Air Quality'},{v:'X',l:'Air Quality Details'}];
+	var displayOptions = [{v:1,l:'Current Conditions'},{v:2,l:'Current Pressure'},{v:3,l:'Last Update'},{v:4,l:'Wind Speed, Gust and Bearing'},{v:5,l:'Ozone and UV Index'},{v:6,l:'Current Temperature'},{v:7,l:'Apparent Temperature'},{v:8,l:'Current Cloud Cover'},{v:9,l:'Percipipation Type, Probability and Intensity'},{v:10,l:'Humidity and Dew Point'},{v:11,l:'Air Quality'},{v:12,l:'Air Quality Details'}];
 	var unitOptions = [{v:'auto',l:'Auto'},{v:'si',l:'System International'},{v:'us',l:'Imperial'},{v:'ca',l:'Canadian'},{v:'uk2',l:'British'},{v:'standard',l:'Standard'},{v:'metric',l:'Metric'},{v:'imperial',l:'Imperial'},{v:'s',l:'System International'},{v:'e',l:'Imperial'},{v:'m',l:'Metric'},{v:'h',l:'British'}];
 	var languageOptions = [{v:'ar',l:'Arabic'},{v:'bg',l:'Bulgarian'},{v:'bn',l:'Bengali'},{v:'bs',l:'Bosnian'},{v:'cs',l:'Czech'},{v:'da',l:'Danish'},{v:'nl',l:'Dutch'},{v:'de',l:'German'},{v:'el',l:'Greek'},{v:'en',l:'English'},{v:'es',l:'Spanish'},{v:'et',l:'Estonian'},{v:'fi',l:'Finnish'},{v:'fr',l:'French'},{v:'he',l:'Hebrew'},{v:'hi',l:'Hindi'},{v:'hr',l:'Croatian'},{v:'hu',l:'Hungarian'},{v:'id',l:'Indonesian'},{v:'is',l:'Icelandic'},{v:'it',l:'Italian'},{v:'ja',l:'Japanese'},{v:'ko',l:'Korean'},{v:'lv',l:'Latvian'},{v:'no',l:'Norwegian'},{v:'pa',l:'Punjabi'},{v:'pl',l:'Polish'},{v:'pt',l:'Portuguese'},{v:'ro',l:'Romanian'},{v:'ru',l:'Russian'},{v:'sk',l:'Slovak'},{v:'sl',l:'Slovenian'},{v:'sr',l:'Serbian'},{v:'sv',l:'Swedish'},{v:'tr',l:'Turkish'},{v:'uk',l:'Ukrainian'}];
 
@@ -59,7 +59,7 @@ var MsWeather = (function (api) {
 			var displayMap = [{'value':0,'label':'Please select...'}];
 			var stationMap = [{'value':0,'label':'Please select...'}];
 			var childDevMap = [{'value':'zz','label':'Please select...'}];
-			var unitMap = [{'value':'auto','label':'Auto'}];
+			var unitMap = [{'value':'','label':'Please select...'}];
 			var languageMap = [{'value':'en','label':'English'}];
 			var logLevel = [{'value':'1','label':'Error'},{'value':'2','label':'Warning'},{'value':'8','label':'Info'},{'value':'11','label':'Debug'}];
 			

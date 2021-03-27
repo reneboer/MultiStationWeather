@@ -10,26 +10,12 @@ Icons based on Wunderground. Information : https://docs.google.com/document/d/1q
 Version 1.0 2021-03-17 
 	- First GA version
 	- Change in Display Line settings directly reflected after Luup reload.
+	- Added Air Quality values (OpenWeather only)
 	
 Version 0.2 2021-03-16 - Beta version for public testing
 Version 0.1 2021-02-25 - Alpha version for testing
 
 https://www.visualcrossing.com/resources/documentation/weather-api/how-to-replace-the-dark-sky-api/
-
-
-and at the air quality. So far i only looked at matching what the DarkSky plugin had, but there are indeed some weather providers that have more data, or less for that matter.
-
-Also any plans to add Air Pollution / Air Quality data from the Open Weather Map API here ?
-
-Specifically interested in seeing this data:
-
-    main.aqi Air Quality Index. Possible values: 1, 2, 3, 4, 5. Where 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor.
-
-Additional Information from their webpage:
-
-"Besides basic Air Quality Index, the API returns data about polluting gases, such as Carbon monoxide (CO), Nitrogen monoxide (NO), Nitrogen dioxide (NO2), Ozone (O3), Sulphur dioxide (SO2), Ammonia (NH3), and particulates (PM2.5 and PM10).
-
-Air pollution forecast is available for 5 days with hourly granularity. Historical data is accessible from 27th November 2020"
 
 --]]
 
@@ -97,14 +83,14 @@ local VariablesMap = {
 		["CurrentHumidity"] = {decimal = 0, childKey = "H", childID = nil},
 		["Icon"] = {},
 		["CurrentOzone"] = {childKey = "O", childID = nil},
-		["CurrentCO"] = {},
+		["CurrentCO"] = {decimal = 0, childKey = "X", childID = nil},
 		["CurrentNO"] = {},
 		["CurrentNO2"] = {},
 		["CurrentSO2"] = {},
 		["CurrentNH3"] = {},
 		["CurrentPM25"] = {},
 		["CurrentPM10"] = {},
-		["CurrentAirQuality"] = {},
+		["CurrentAirQuality"] = {childKey = "Q", childID = nil},
 		["CurrentuvIndex"] = {childKey = "U", childID = nil},
 		["CurrentVisibility"] = {decimal = 3, childKey = "V", childID = nil},
 		["CurrentPrecipIntensity"] = {},
@@ -170,7 +156,9 @@ local DisplayMap = {
     [7] = {{ prefix = "Apparent Temperature: ", var = "CurrentApparentTemperature" }},
     [8] = {{ prefix = "Current Cloud Cover: ", var = "CurrentCloudCover" }},
     [9] = {{ prefix = "Precip: ", var = "CurrentPrecipType" },{ prefix = "Prob.: ", var = "CurrentPrecipProbability" },{ prefix = "Intensity: ", var = "CurrentPrecipIntensity" }},
-    [10] = {{ prefix = "Humidity: ", var = "CurrentHumidity" },{ prefix = "Dew Point: ", var = "CurrentDewPoint" }}
+    [10] = {{ prefix = "Humidity: ", var = "CurrentHumidity" },{ prefix = "Dew Point: ", var = "CurrentDewPoint" }},
+    [11] = {{ prefix = "AQI: ", var = "CurrentAirQuality" },{ prefix = "PM2.5: ", var = "CurrentPM25" },{ prefix = "PM10: ", var = "CurrentPM10" }},
+    [12] = {{ prefix = "Co: ", var = "CurrentCO" },{ prefix = "No: ", var = "CurrentNO" },{ prefix = "No2: ", var = "CurrentNO2" }}
 }
 -- for writing to Luup variables, need serviceId and variable name for each sensor type
 -- for creating child devices also need device xml filename
@@ -185,7 +173,9 @@ local SensorInfo = setmetatable (
     ['O'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 2 , name="Ozone"},
     ['V'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 3 , name="Visibility"},
     ['W'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 4 , name="Wind"},
-    ['R'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 5 , name="Precipitation"}
+    ['R'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 5 , name="Precipitation"},
+    ['Q'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 6 , name="Air Quality"},
+    ['X'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 6 , name="Air Quality values"}
   },
   {__index = function ()  -- default for everything else
       return { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel"} 
@@ -1647,7 +1637,7 @@ local function setvariables(variable, varmap, value, prefix)
 		local c = varmap.childKey
 		var.Set(SensorInfo[c].variable, value, SensorInfo[c].serviceId, varmap.childID)
 		-- Set display values for generic sensors
-		if c == "W" then
+		if c == "W" or c == "Q" or c == "X" then
 			luup.call_delay("MS_UpdateMultiDataItem",2,c..varmap.childID)
 		elseif c == "R" then
 			-- Value is new PrecipProbability, when more than 1% display other than just dry
@@ -1688,6 +1678,22 @@ function MS_UpdateMultiDataItem(data)
 		local wb = var.GetNumber("CurrentWindBearing")
 		var.Set("DisplayLine1", sf("Speed %.1f, Gust %.1f ",ws,wg), SID_AltUI, ID)
 		var.Set("DisplayLine2", sf("Bearing %d ",wb), SID_AltUI, ID)
+	elseif item == "Q" then
+		log.Debug("Updating air quality data for child device "..ID)
+		local aqi = var.GetNumber("CurrentAirQuality")
+		local pm10 = var.GetNumber("CurrentPM10")
+		local pm25 = var.GetNumber("CurrentPM25")
+		var.Set("DisplayLine1", sf("Air Qual. Ind. %d",aqi), SID_AltUI, ID)
+		var.Set("DisplayLine2", sf("Fine part. %.2f, Coarse part. %.2f",pm25,pm10), SID_AltUI, ID)
+	elseif item == "X" then
+		log.Debug("Updating air quality 2 data for child device "..ID)
+		local co = var.GetNumber("CurrentCO")
+		local no = var.GetNumber("CurrentNO")
+		local no2 = var.GetNumber("CurrentNO2")
+		local so2 = var.GetNumber("CurrentSO2")
+		local nh3 = var.GetNumber("CurrentNH3")
+		var.Set("DisplayLine1", sf("CO %d, NO %.2f, NO2 %.2f",co,no,no2), SID_AltUI, ID)
+		var.Set("DisplayLine2", sf("NH3 %.2f, SO2 %.2f",so2,nh3), SID_AltUI, ID)
 	elseif item == "R" then
 		log.Debug("Updating rain data for child device "..ID)
 		local pp = var.GetNumber("CurrentPrecipProbability")

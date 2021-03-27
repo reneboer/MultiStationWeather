@@ -48,6 +48,14 @@
 					"operator": "==","value": 5 
 				} 
 			]
+		},
+		{ 	"img": "https://raw.githubusercontent.com/reneboer/MultiStationWeather/master/icons/MsWeatherMetric_150.png", 
+			"conditions": [ 
+				{ 	"service": "urn:upnp-rboer-com:serviceId:Weather1", 
+					"variable": "IconSet", 
+					"operator": "==","value": 6
+				} 
+			]
 		}
     ],
     "DisplayStatus": {

@@ -1259,6 +1259,415 @@
 		{
 			"id": 21,
 			"label": {
+				"lang_tag": "ui7_airquality_goes_above",
+				"text": "Air quality goes above"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"minValue": "1",
+				"maxValue": "5",
+				"name": "CurrentAirQuality",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_airquality_goes_above",
+					"text": "_DEVICE_NAME_ air quality goes above _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 22,
+			"label": {
+				"lang_tag": "ui7_ui7_airquality_goes_below",
+				"text": "Air quality goes below"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"name": "CurrentAirQuality",
+				"minValue": "1",
+				"maxValue": "5",
+				"comparisson": "<",
+				"prefix": {},
+				"suffix": {},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_ui7_airquality_goes_below",
+					"text": "_DEVICE_NAME_ wind gust speed goes below _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 23,
+			"label": {
+				"lang_tag": "ui7_pm25_goes_above",
+				"text": "Fine particles matter goes above"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"minValue": "0",
+				"maxValue": "1000",
+				"name": "CurrentPM25",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_pm25_goes_above",
+					"text": "_DEVICE_NAME_ fine particles matter goes above _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 24,
+			"label": {
+				"lang_tag": "ui7_pm25_goes_below",
+				"text": "Fine particles matter goes below"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"name": "CurrentPM25",
+				"minValue": "0",
+				"maxValue": "1000",
+				"comparisson": "<",
+				"prefix": {},
+				"suffix": {},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_pm25_goes_below",
+					"text": "_DEVICE_NAME_ fine particles matter goes below _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 25,
+			"label": {
+				"lang_tag": "ui7_pm10_goes_above",
+				"text": "Coarse particles matter goes above"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"minValue": "0",
+				"maxValue": "1000",
+				"name": "CurrentPM10",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_pm10_goes_above",
+					"text": "_DEVICE_NAME_ coarse particles matter goes above _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 26,
+			"label": {
+				"lang_tag": "ui7_pm10_goes_below",
+				"text": "Coarse particles matter goes below"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"name": "CurrentPM10",
+				"minValue": "0",
+				"maxValue": "1000",
+				"comparisson": "<",
+				"prefix": {},
+				"suffix": {},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_pm10_goes_below",
+					"text": "_DEVICE_NAME_ coarse particles matter goes below _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 27,
+			"label": {
+				"lang_tag": "ui7_carbon_monoxide_goes_above",
+				"text": "Carbon monoxide goes above"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"minValue": "0",
+				"maxValue": "1000",
+				"name": "CurrentCO",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_carbon_monoxide_goes_above",
+					"text": "_DEVICE_NAME_ carbon monoxide goes above _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 28,
+			"label": {
+				"lang_tag": "ui7_carbon_monoxide_goes_below",
+				"text": "Carbon monoxide goes below"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"maxValue": "1000",
+				"name": "CurrentCO",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_carbon_monoxide_goes_below",
+					"text": "_DEVICE_NAME_ carbon monoxide goes below _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 29,
+			"label": {
+				"lang_tag": "ui7_nitrogen_monoxide_goes_above",
+				"text": "Nitrogen monoxide goes above"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"minValue": "0",
+				"maxValue": "100",
+				"name": "CurrentNO",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_nitrogen_monoxide_goes_above",
+					"text": "_DEVICE_NAME_ nitrogen monoxide goes above _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 30,
+			"label": {
+				"lang_tag": "ui7_nitrogen_monoxide_goes_below",
+				"text": "Nitrogen monoxide goes below"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"maxValue": "100",
+				"name": "CurrentNO",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_nitrogen_monoxide_goes_below",
+					"text": "_DEVICE_NAME_ nitrogen monoxide goes below _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 31,
+			"label": {
+				"lang_tag": "ui7_nitrogen_dioxide_goes_above",
+				"text": "Nitrogen dioxide goes above"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"minValue": "0",
+				"maxValue": "1000",
+				"name": "CurrentNO2",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_nitrogen_dioxide_goes_above",
+					"text": "_DEVICE_NAME_ nitrogen dioxide goes above _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 32,
+			"label": {
+				"lang_tag": "ui7_nitrogen_dioxide_goes_below",
+				"text": "Nitrogen dioxide goes below"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"maxValue": "1000",
+				"name": "CurrentNO2",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_nitrogen_dioxide_goes_below",
+					"text": "_DEVICE_NAME_ nitrogen dioxide goes below _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 33,
+			"label": {
+				"lang_tag": "ui7_sulphur_dioxide_goes_above",
+				"text": "Sulphur dioxide goes above"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"minValue": "0",
+				"maxValue": "100",
+				"name": "CurrentSO2",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_sulphur_dioxide_goes_above",
+					"text": "_DEVICE_NAME_ sulphur dioxide goes above _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 34,
+			"label": {
+				"lang_tag": "ui7_sulphur_dioxide_goes_below",
+				"text": "Sulphur dioxide goes below"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"maxValue": "100",
+				"name": "CurrentSO2",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_sulphur_dioxide_goes_below",
+					"text": "_DEVICE_NAME_ sulphur dioxide goes below _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 35,
+			"label": {
+				"lang_tag": "ui7_ammonia_goes_above",
+				"text": "Ammonia goes above"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"minValue": "0",
+				"maxValue": "100",
+				"name": "CurrentNH3",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_ammonia_goes_above",
+					"text": "_DEVICE_NAME_ ammonia goes above _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 36,
+			"label": {
+				"lang_tag": "ui7_ammonia_goes_below",
+				"text": "Ammonia goes below"
+			},
+			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
+			"norepeat": "1",
+			"argumentList": [{
+				"id": 1,
+				"dataType": "i4",
+				"defaultValue": "",
+				"maxValue": "100",
+				"name": "CurrentNH3",
+				"comparisson": ">",
+				"prefix": {},
+				"suffix": {
+					"lang_tag": "ui7_ugm",
+					"text": "ug/m3"
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ui7_hft_ammonia_goes_below",
+					"text": "_DEVICE_NAME_ ammonia goes below _ARGUMENT_VALUE_ "
+				}
+			}]
+		},
+		{
+			"id": 37,
+			"label": {
 				"lang_tag": "ui7_icon_changes_to",
 				"text": "Icon changes to"
 			},
@@ -1271,63 +1680,291 @@
 				"name": "icon",
 				"allowedValueList": [
 					{
-						"Clear day": "clear-day",
+						"Tornado": "0",
 						"HumanFriendlyText": {
-							"text": "Whenever it is a clear day"
+							"text": "Whenever there is a tornado"
 						}
 					},
 					{
-						"Clear night": "clear-night",
+						"TropicalStorm": "1",
 						"HumanFriendlyText": {
-							"text": "Whenever it is a clear night"
+							"text": "Whenever there is a tropical storm"
 						}
 					},
 					{
-						"Raining": "rain",
+						"Hurricane": "2",
+						"HumanFriendlyText": {
+							"text": "Whenever there is a hurricane"
+						}
+					},
+					{
+						"StrongStorms": "3",
+						"HumanFriendlyText": {
+							"text": "Whenever there are strong storms"
+						}
+					},
+					{
+						"Thunderstorms": "4",
+						"HumanFriendlyText": {
+							"text": "Whenever there are thunderstorms"
+						}
+					},
+					{
+						"RainSnow": "5",
+						"HumanFriendlyText": {
+							"text": "Whenever there is rain and snow"
+						}
+					},
+					{
+						"RainSleet": "6",
+						"HumanFriendlyText": {
+							"text": "Whenever there is rain and sleet"
+						}
+					},
+					{
+						"WintryMix": "7",
+						"HumanFriendlyText": {
+							"text": "Whenever there is a wintry mix"
+						}
+					},
+					{
+						"FreezingDrizzle": "8",
+						"HumanFriendlyText": {
+							"text": "Whenever there is a freezing drizzle"
+						}
+					},
+					{
+						"Drizzle": "9",
+						"HumanFriendlyText": {
+							"text": "Whenever there is a drizzle"
+						}
+					},
+					{
+						"FreezingRain": "10",
+						"HumanFriendlyText": {
+							"text": "Whenever there is a freezing rain"
+						}
+					},
+					{
+						"Showers": "11",
+						"HumanFriendlyText": {
+							"text": "Whenever there are showers"
+						}
+					},
+					{
+						"Raining": "12",
 						"HumanFriendlyText": {
 							"text": "Whenever it is raining"
 						}
 					},
 					{
-						"Snowing": "snow",
+						"Flurries": "13",
+						"HumanFriendlyText": {
+							"text": "Whenever there are flurries"
+						}
+					},
+					{
+						"Showers": "14",
+						"HumanFriendlyText": {
+							"text": "Whenever there are snow showers"
+						}
+					},
+					{
+						"SnowDrifts": "15",
+						"HumanFriendlyText": {
+							"text": "Whenever there are snow drifts"
+						}
+					},
+					{
+						"Snow": "16",
 						"HumanFriendlyText": {
 							"text": "Whenever it is snowing"
 						}
 					},
 					{
-						"Sleet": "sleet",
+						"Hail": "17",
+						"HumanFriendlyText": {
+							"text": "Whenever there is hail"
+						}
+					},
+					{
+						"Sleet": "18",
 						"HumanFriendlyText": {
 							"text": "Whenever there is sleet"
 						}
 					},
 					{
-						"Windy": "wind",
+						"SandStorm": "19",
 						"HumanFriendlyText": {
-							"text": "Whenever it is windy"
+							"text": "Whenever there a sandstorm"
 						}
 					},
 					{
-						"Foggy": "fog",
+						"Foggy": "20",
 						"HumanFriendlyText": {
 							"text": "Whenever it is foggy"
 						}
 					},
 					{
-						"Cloudy": "cloudy",
+						"Haze": "21",
+						"HumanFriendlyText": {
+							"text": "Whenever there is a haze"
+						}
+					},
+					{
+						"Smoke": "22",
+						"HumanFriendlyText": {
+							"text": "Whenever there is smoke"
+						}
+					},
+					{
+						"Breezy": "23",
+						"HumanFriendlyText": {
+							"text": "Whenever it is breezy"
+						}
+					},
+					{
+						"Windy": "24",
+						"HumanFriendlyText": {
+							"text": "Whenever it is windy"
+						}
+					},
+					{
+						"Frigid": "25",
+						"HumanFriendlyText": {
+							"text": "Whenever it is frigid"
+						}
+					},
+					{
+						"Cloudy": "26",
 						"HumanFriendlyText": {
 							"text": "Whenever it is cloudy"
 						}
 					},
 					{
-						"Partly cloudy day": "partly-cloudy-day",
+						"CloudyNight": "27",
+						"HumanFriendlyText": {
+							"text": "Whenever it is a mostly cloudy night"
+						}
+					},
+					{
+						"CloudyDay": "28",
+						"HumanFriendlyText": {
+							"text": "Whenever it is a mostly cloudy day"
+						}
+					},
+					{
+						"Partly cloudy day": "29",
 						"HumanFriendlyText": {
 							"text": "Whenever it is a partly cloudy day"
 						}
 					},
 					{
-						"Partly cloudy night": "partly-cloudy-night",
+						"Partly cloudy night": "30",
 						"HumanFriendlyText": {
 							"text": "Whenever it is a partly cloudy night"
+						}
+					},
+					{
+						"Clear night": "31",
+						"HumanFriendlyText": {
+							"text": "Whenever it is a clear night"
+						}
+					},
+					{
+						"Clear day": "32",
+						"HumanFriendlyText": {
+							"text": "Whenever it is a sunny day"
+						}
+					},
+					{
+						"Mostly Clear night": "33",
+						"HumanFriendlyText": {
+							"text": "Whenever it is a mostly clear night"
+						}
+					},
+					{
+						"Mostly Clear day": "34",
+						"HumanFriendlyText": {
+							"text": "Whenever it is a mostly sunny day"
+						}
+					},
+					{
+						"MixedRainHail": "35",
+						"HumanFriendlyText": {
+							"text": "Whenever it is mixed rain and hail"
+						}
+					},
+					{
+						"Hot day": "36",
+						"HumanFriendlyText": {
+							"text": "Whenever it is a hot day"
+						}
+					},
+					{
+						"IsolatedThunderstorms": "37",
+						"HumanFriendlyText": {
+							"text": "Whenever there are isolated thunderstorms"
+						}
+					},
+					{
+						"ScatterdThunderstormsDay": "38",
+						"HumanFriendlyText": {
+							"text": "Whenever there are scattered thunderstorms at day"
+						}
+					},
+					{
+						"ScatterdShowersDay": "39",
+						"HumanFriendlyText": {
+							"text": "Whenever there are scattered showers at day"
+						}
+					},
+					{
+						"HeavyRain": "40",
+						"HumanFriendlyText": {
+							"text": "Whenever there is heavy rain"
+						}
+					},
+					{
+						"ScatterdSnowShowersDay": "41",
+						"HumanFriendlyText": {
+							"text": "Whenever there are scattered snow showers at day"
+						}
+					},
+					{
+						"HeavySnow": "42",
+						"HumanFriendlyText": {
+							"text": "Whenever there is heavy snow"
+						}
+					},
+					{
+						"Blizzard": "43",
+						"HumanFriendlyText": {
+							"text": "Whenever there is a blizzard"
+						}
+					},
+					{
+						"NA": "44",
+						"HumanFriendlyText": {
+							"text": "Not availble"
+						}
+					},
+					{
+						"ScatterdShowersNight": "45",
+						"HumanFriendlyText": {
+							"text": "Whenever there are scattered showers at night"
+						}
+					},
+					{
+						"ScatterdSnowShowersNight": "46",
+						"HumanFriendlyText": {
+							"text": "Whenever there are scattered snow showers at night"
+						}
+					},
+					{
+						"ScatterdThunderstormsNight": "47",
+						"HumanFriendlyText": {
+							"text": "Whenever there are scattered thunderstorms at night"
 						}
 					}
 				],

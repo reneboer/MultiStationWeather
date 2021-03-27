@@ -2,7 +2,7 @@
 <!-- 
 	Module S_MsWeather.xml
 	Written by R.Boer. 
-	V1.0, 22 March 2021
+	V1.0, 27 March 2021
 -->
 <scpd xmlns="urn:schemas-upnp-org:service-1-0">
 	<specVersion>
@@ -98,9 +98,37 @@
 			<dataType>float</dataType>
 			<shortCode>CurrentWindSpeed</shortCode>
 		</stateVariable>
-		<stateVariable sendEvents="yes"><name>CurrentWindGust</name>
+		<stateVariable sendEvents="yes"><name>CurrentAirQuality</name>
+			<dataType>ui2</dataType>
+			<shortCode>CurrentAirQuality</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentCO</name>
+			<dataType>ui4</dataType>
+			<shortCode>CurrentCO</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentNO</name>
 			<dataType>float</dataType>
-			<shortCode>CurrentWindGust</shortCode>
+			<shortCode>CurrentNO</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentNO2</name>
+			<dataType>float</dataType>
+			<shortCode>CurrentNO2</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentNH3</name>
+			<dataType>float</dataType>
+			<shortCode>CurrentNH3</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentSO2</name>
+			<dataType>float</dataType>
+			<shortCode>CurrentSO2</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentPM25</name>
+			<dataType>float</dataType>
+			<shortCode>CurrentPM25</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentPM10</name>
+			<dataType>float</dataType>
+			<shortCode>CurrentPM10</shortCode>
 		</stateVariable>
 		<stateVariable sendEvents="yes"><name>WeekConditions</name>
 			<dataType>string</dataType>
