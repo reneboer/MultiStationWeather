@@ -554,12 +554,12 @@ local function insert_value(tab, varName, value, iconMap)
 		elseif vn == "Icon" and iconMap then 
 			value = iconMap[value] or 44
 		end
-		log.Debug("Insert key %s, value %s", vn, value)
+--		log.Debug("Insert key %s, value %s", vn, value)
 		ti(tab, {vn, value})
 		return true
 	else
 		if def then
-			log.Debug("Insert key %s, default value %s", vn, def)
+--			log.Debug("Insert key %s, default value %s", vn, def)
 			ti(tab, {vn, def})
 			return true
 		end
@@ -1476,7 +1476,7 @@ local ProviderMap = {
 				}
 				local forecastMap = { 
 						["weatherdescription"] = "Conditions",
-						["sunChance"] = "SunChange",
+						["sunChance"] = "SunProbability",
 						["mmRainMin"] = "PrecipIntensity",
 						["mmRainMax"] = "PrecipIntensityMax",
 						["rainChance"] = "PrecipProbability",
