@@ -8,6 +8,7 @@ Currently supported weather stations:
 - Open Weather
 - Ambient Weather
 - Buienradar (the Netherlands only)
+- KNMI  (the Netherlands only)
 
 Additional suggestions are welcome, but you will need to help with testing.
 
