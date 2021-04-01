@@ -1259,48 +1259,54 @@
 		{
 			"id": 21,
 			"label": {
-				"lang_tag": "ui7_airquality_goes_above",
-				"text": "Air quality goes above"
+				"lang_tag": "ui7_airquality_changes_to",
+				"text": "Air quality changes to"
 			},
 			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
 			"norepeat": "1",
 			"argumentList": [{
 				"id": 1,
-				"dataType": "i4",
+				"dataType": "string",
 				"defaultValue": "",
-				"minValue": "1",
-				"maxValue": "5",
 				"name": "CurrentAirQuality",
-				"comparisson": ">",
+				"allowedValueList": [
+					{
+						"Good": "Good",
+						"HumanFriendlyText": {
+							"text": "Good"
+						}
+					},
+					{
+						"Fair": "Fair",
+						"HumanFriendlyText": {
+							"text": "Fair"
+						}
+					},
+					{
+						"Moderate": "Moderate",
+						"HumanFriendlyText": {
+							"text": "Moderate"
+						}
+					},
+					{
+						"Poor": "Poor",
+						"HumanFriendlyText": {
+							"text": "Poor"
+						}
+					},
+					{
+						"VeryPoor": "Very Poor",
+						"HumanFriendlyText": {
+							"text": "Very Poor"
+						}
+					}
+				],
+				"comparisson": "=",
 				"prefix": {},
 				"suffix": {},
 				"HumanFriendlyText": {
-					"lang_tag": "ui7_hft_airquality_goes_above",
-					"text": "_DEVICE_NAME_ air quality goes above _ARGUMENT_VALUE_ "
-				}
-			}]
-		},
-		{
-			"id": 22,
-			"label": {
-				"lang_tag": "ui7_ui7_airquality_goes_below",
-				"text": "Air quality goes below"
-			},
-			"serviceId": "urn:upnp-rboer-com:serviceId:Weather1",
-			"norepeat": "1",
-			"argumentList": [{
-				"id": 1,
-				"dataType": "i4",
-				"defaultValue": "",
-				"name": "CurrentAirQuality",
-				"minValue": "1",
-				"maxValue": "5",
-				"comparisson": "<",
-				"prefix": {},
-				"suffix": {},
-				"HumanFriendlyText": {
-					"lang_tag": "ui7_hft_ui7_airquality_goes_below",
-					"text": "_DEVICE_NAME_ wind gust speed goes below _ARGUMENT_VALUE_ "
+					"lang_tag": "ui7_hft_airquality_changes_to",
+					"text": "_DEVICE_NAME_ air quality changes to _ARGUMENT_VALUE_ "
 				}
 			}]
 		},

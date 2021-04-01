@@ -99,7 +99,7 @@
 			<shortCode>CurrentWindSpeed</shortCode>
 		</stateVariable>
 		<stateVariable sendEvents="yes"><name>CurrentAirQuality</name>
-			<dataType>ui2</dataType>
+			<dataType>string</dataType>
 			<shortCode>CurrentAirQuality</shortCode>
 		</stateVariable>
 		<stateVariable sendEvents="yes"><name>CurrentCO</name>
@@ -130,9 +130,13 @@
 			<dataType>float</dataType>
 			<shortCode>CurrentPM10</shortCode>
 		</stateVariable>
-		<stateVariable sendEvents="yes"><name>WeekConditions</name>
-			<dataType>string</dataType>
-			<shortCode>WeekConditions</shortCode>
+		<stateVariable sendEvents="yes"><name>CurrentSunset</name>
+			<dataType>ui4</dataType>
+			<shortCode>CurrentSunset</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentSunrise</name>
+			<dataType>ui4</dataType>
+			<shortCode>CurrentSunrise</shortCode>
 		</stateVariable>
 		<stateVariable sendEvents="no"><name>TodayCloudCover</name>
 			<dataType>ui1</dataType>
@@ -178,6 +182,18 @@
 			<dataType>string</dataType>
 			<shortCode>TodayPrecipType</shortCode>
 		</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayPrecipIntensity</name>
+			<dataType>string</dataType>
+			<shortCode>TodayPrecipIntensity</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="no"><name>TodayPrecipProbability</name>
+			<dataType>string</dataType>
+			<shortCode>TodayPrecipProbability</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="no"><name>TodaySunProbability</name>
+			<dataType>string</dataType>
+			<shortCode>TodaySunProbability</shortCode>
+		</stateVariable>
 		<stateVariable sendEvents="no"><name>TodayPressure</name>
 			<dataType>ui2</dataType>
 			<shortCode>TodayPressure</shortCode>
@@ -205,6 +221,14 @@
 		<stateVariable sendEvents="no"><name>TodayuvIndex</name>
 			<dataType>ui2</dataType>
 			<shortCode>TodayuvIndex</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="no"><name>TodaySunset</name>
+			<dataType>ui4</dataType>
+			<shortCode>TodaySunset</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="no"><name>TodaySunrise</name>
+			<dataType>ui4</dataType>
+			<shortCode>TodaySunrise</shortCode>
 		</stateVariable>
 		<stateVariable sendEvents="no"><name>TomorrowCloudCover</name>
 			<dataType>ui1</dataType>
@@ -250,6 +274,18 @@
 			<dataType>string</dataType>
 			<shortCode>TomorrowPrecipType</shortCode>
 		</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowPrecipIntensity</name>
+			<dataType>string</dataType>
+			<shortCode>TomorrowPrecipIntensity</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowPrecipProbability</name>
+			<dataType>string</dataType>
+			<shortCode>TomorrowPrecipProbability</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowSunProbability</name>
+			<dataType>string</dataType>
+			<shortCode>TomorrowSunProbability</shortCode>
+		</stateVariable>
 		<stateVariable sendEvents="no"><name>TomorrowPressure</name>
 			<dataType>ui2</dataType>
 			<shortCode>TomorrowPressure</shortCode>
@@ -277,6 +313,14 @@
 		<stateVariable sendEvents="no"><name>TomorrowuvIndex</name>
 			<dataType>ui2</dataType>
 			<shortCode>TomorrowuvIndex</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowSunset</name>
+			<dataType>ui4</dataType>
+			<shortCode>TomorrowSunset</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="no"><name>TomorrowSunrise</name>
+			<dataType>ui4</dataType>
+			<shortCode>TomorrowSunrise</shortCode>
 		</stateVariable>
 	</serviceStateTable>
 	<actionList>

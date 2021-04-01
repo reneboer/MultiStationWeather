@@ -1,11 +1,18 @@
 ABOUT = {
 	NAME = "Multi Weather Station",
-	VERSION = "1.0",
+	VERSION = "1.1",
 	DESCRIPTION = "Multi Weather Station plugin",
 	AUTHOR = "Rene Boer"
 }	
 --[[
 Icons based on Wunderground. Information : https://docs.google.com/document/d/1qpc4QN3YDpGDGGNYVINh7tfeulcZ4fxPSC5f4KzpR_U/edit
+
+Version 1.1 2021-04-1
+	- Added KNMI (weerlive, NL) weather provider
+	- Fix for Precipitation update
+	- Fix for Wundergrouns metric_si units
+	- More generic functions, less code per provider
+	- Minor fixes
 
 Version 1.0 2021-03-17 
 	- First GA version
@@ -59,7 +66,7 @@ local MS = {
 	StationID = 0,
 	StationName = "",
 	Period = 1800,	-- data refresh interval in seconds
-	Units = "auto",
+	Units = "",
 	ForecastDays = 2,
 	DispLine1 = 1,
 	DispLine2 = 2,
@@ -93,13 +100,15 @@ local VariablesMap = {
 		["CurrentAirQuality"] = {childKey = "Q", childID = nil},
 		["CurrentuvIndex"] = {childKey = "U", childID = nil},
 		["CurrentVisibility"] = {decimal = 3, childKey = "V", childID = nil},
-		["CurrentPrecipIntensity"] = {},
-		["CurrentPrecipProbability"] = {decimal = 0, childKey = "R", childID = nil},
+		["CurrentPrecipIntensity"] = {childKey = "R", childID = nil},
+		["CurrentPrecipProbability"] = {decimal = 0},
 		["CurrentPrecipType"] = {},
 		["CurrentPressure"] = {decimal = 0, childKey = "P", childID = nil},
 		["CurrentConditions"] = {},
 		["CurrentTemperature"] = {decimal = 1, childKey = "T", childID = nil},
 		["LastUpdate"] = {},
+		["CurrentSunrise"] =  {},
+		["CurrentSunset"] =  {},
 		["CurrentWindDirection"] =  {},
 		["CurrentWindBearing"] =  {},
 		["CurrentWindSpeed"] = {decimal = 1, childKey = "W", childID = nil},
@@ -117,6 +126,7 @@ local VariablesMap = {
 		["PrecipIntensity"] = {},
 		["PrecipIntensityMax"] = {},
 		["PrecipProbability"] = {decimal = 0},
+		["SunProbability"] = {decimal = 0},
 		["PrecipType"] = {},
 		["MaxTemp"] = {decimal = 1},
 		["MinTemp"] = {decimal = 1},
@@ -132,6 +142,8 @@ local VariablesMap = {
 		["WindBearing"] =  {},
 		["WindSpeed"] = {decimal = 1},
 		["WindGust"] = {decimal = 1},
+		["Sunrise"] =  {},
+		["Sunset"] =  {},
 		["SunChange"] = {}
 	}
 }
@@ -524,24 +536,103 @@ local function HttpsGet(strURL)
 end
 
 -- Insert found value into table
-local function insert_value(vc_cur, varName, value, iconMap)
+local function insert_value(tab, varName, value, iconMap)
 	local ti = table.insert
 	local mult = nil
+	local def = nil
+	local vn = nil
 	if type(varName) == "table" then
 		mult = varName.multiplier
-		varName = varName.name
+		def = varName.default
+		vn = varName.name
+	else
+		vn = varName
 	end
 	if value then
 		if mult then
 			value = tonumber(value) * mult
-		elseif varName == "Icon" and iconMap then 
+		elseif vn == "Icon" and iconMap then 
 			value = iconMap[value] or 44
 		end
-		ti(vc_cur, {varName, value})
+		log.Debug("Insert key %s, value %s", vn, value)
+		ti(tab, {vn, value})
 		return true
 	else
+		if def then
+			log.Debug("Insert key %s, default value %s", vn, def)
+			ti(tab, {vn, def})
+			return true
+		end
 		return false
 	end
+end
+
+-- Do nested key mapping. 
+local function key_map(tkey, curItems, confMap)
+	local function key_map_sub(key, curItems)
+		local value = nil
+		if key:find("%.") then
+			local x = curItems
+			for field in key:gmatch "[^%.%[%]]+" do
+				x = x[tonumber(field) or field]
+				if not x then return nil end
+			end
+			value = x
+		else
+			value = curItems[key]
+		end
+		return value
+	end
+	-- Look for key conversions
+	if confMap then
+		-- Substitude part of key if needed.
+		if type(confMap.sub) == "table" and #confMap.sub == 2 then
+			if tkey:find(confMap.sub[1]) then
+				tkey = tkey:gsub(confMap.sub[1], confMap.sub[2])
+--log.Debug("  sub %s with %s, resulting key %s",confMap.sub[1], confMap.sub[2], tkey)
+			end
+		end
+		-- Prefix key if needed.
+		if type(confMap.prfx) == "string" then
+			tkey = confMap.prfx .. tkey
+--log.Debug("  prefix with %s, resulting key %s",confMap.prfx,tkey)
+		end
+	end
+	local value = nil
+	if tkey:find("|") then
+		if tkey:sub(1,2) == "o|" then
+			-- Use either key as value
+			local key1,key2 = tkey:match("o|([%w_]-)|([%w_]+)")
+			if curItems[key1] then
+				value = key1
+			elseif curItems[key2] then
+				value = key2
+			end
+		else
+			-- Get value of either key. If missing there is none, i.e. zero.
+			local key1,key2 = tkey:match("([%w_%.]-)|([%w_%.]+)")
+			value = key_map_sub(key1, curItems) or key_map_sub(key2, curItems)
+		end
+	else
+		value = key_map_sub(tkey, curItems)
+	end
+	if confMap and confMap.ppf then
+		value = confMap.ppf(tkey, value)
+	end
+	return value
+end
+
+-- Process one day data and map
+local function parse_input_day(input, varMap, iconMap, confMap)
+	local res = {}
+	for tkey, varName in pairs(varMap) do
+		-- See if complex mapping is needed
+		local value = key_map(tkey, input, confMap)
+		if not insert_value(res, varName, value, iconMap) then
+			log.Debug("Key not found %s",tkey)
+		end
+	end
+	return res
 end
 
 -- Table of Weather providers with init and update functions
@@ -581,8 +672,7 @@ local ProviderMap = {
 				end
 
 				-- this is the table used to map any providers output elements with the plugin variables
-				local PR_VariablesMap = {
-					currently = { 
+				local currentlyMap = { 
 						["apparentTemperature"] = "CurrentApparentTemperature",
 						["cloudCover"] = { name = "CurrentCloudCover", multiplier = 100 },
 						["dewPoint"] = "CurrentDewPoint",
@@ -598,11 +688,13 @@ local ProviderMap = {
 						["summary"] = "CurrentConditions",
 						["temperature"] = "CurrentTemperature",
 						["time"] = "LastUpdate",
-						["windBearing"] =  "CurrentWindBearing",
+						["sunriseTime"] = "CurrentSunrise",
+						["sunsetTime"] = "CurrentSunset",
+						["windBearing"] = "CurrentWindBearing",
 						["windSpeed"] = "CurrentWindSpeed",
 						["windGust"] = "CurrentWindGust"
-					},
-					forecast = { 
+				}
+				local forecastMap = { 
 						["pressure"] = "Pressure",
 						["summary"] = "Conditions",
 						["ozone"] = "Ozone",
@@ -622,49 +714,23 @@ local ProviderMap = {
 						["cloudCover"] = { name = "CloudCover", multiplier = 100 },
 						["dewPoint"] = "DewPoint",
 						["humidity"] = { name = "Humidity", multiplier = 100 },
-						["windBearing"] =  "WindBearing",
+						["sunriseTime"] = "Sunrise",
+						["sunsetTime"] = "Sunset",
+						["windBearing"] = "WindBearing",
 						["windSpeed"] = "WindSpeed",
 						["windGust"] = "WindGust"
-					},
-					daily_summary = "WeekConditions",
-					flags_units = "ReportedUnits"
 				}
-				iconMap = {
-					["clear-day"] = 32,
-					["clear-night"] = 31,
-					["rain"] = 12,
-					["snow"] = 16,
-					["sleet"] = 18,
-					["wind"] = 24,
-					["fog"] = 20,
-					["cloudy"] = 26,
-					["partly-cloudy-day"] = 30,
-					["partly-cloudy-night"] = 29,
-					["hail"] = 17,
-					["thunderstorm"] = 4,
-					["tornado"] = 1
+				local iconMap = {
+					["clear-day"] = 32, ["clear-night"] = 31, ["rain"] = 12, ["snow"] = 16, ["sleet"] = 18, ["wind"] = 24,
+					["fog"] = 20, ["cloudy"] = 26, ["partly-cloudy-day"] = 30, ["partly-cloudy-night"] = 29, ["hail"] = 17,
+					["thunderstorm"] = 4, ["tornado"] = 1
 				}
 				
-				local ti = table.insert
 				local varContainer = {}
 				-- Get the currently values we are interested in.
 				local curItems = data.currently
 				if curItems then
-					varContainer.currently = {}
-					local vc_cur = varContainer.currently
-					for tkey, varName in pairs(PR_VariablesMap.currently) do
-						if not insert_value(vc_cur, varName, curItems[tkey], iconMap) then
-							log.Debug("Currently key not found %s",tkey)
-						end     
-					end
-					-- Get daily summary data
-					if data.daily.summary then
-						ti(vc_cur, {PR_VariablesMap.daily_summary, data.daily.summary})
-					end	
-					-- Get units data
-					if data.flags.units then
-						ti(vc_cur, {PR_VariablesMap.flags_units, data.flags.units})
-					end	
+					varContainer.currently = parse_input_day(curItems, currentlyMap, iconMap)
 				else
 					log.Warning("No currently data")
 				end
@@ -674,13 +740,7 @@ local ProviderMap = {
 					for fd = 1, MS.ForecastDays do
 						local curDay = data.daily.data[fd]
 						if curDay then
-							varContainer.forecast[fd] = {}
-							local vc_for = varContainer.forecast[fd]
-							for tkey, varName in pairs(PR_VariablesMap.forecast) do
-								if not insert_value(vc_for, varName, curDay[tkey], iconMap) then
-									log.Debug("Daily %d key %s not found",fd,tkey)
-								end     
-							end
+							varContainer.forecast[fd] = parse_input_day(curDay, forecastMap, iconMap)
 						else
 							log.Warning("No daily data for day "..fd)
 						end
@@ -725,8 +785,7 @@ local ProviderMap = {
 				end
 
 				-- this is the table used to map any providers output elements with the plugin variables
-				local PR_VariablesMap = {
-					currently = { 
+				local currentlyMap = { 
 						["units.heatIndex"] = "CurrentApparentTemperature",
 --						[""] = "CurrentCloudCover",
 						["units.dewpt"] = "CurrentDewPoint",
@@ -742,66 +801,46 @@ local ProviderMap = {
 --						[""] = "CurrentConditions",
 						["units.temp"] = "CurrentTemperature",
 						["epoch"] = "LastUpdate",
+--						[""] = "CurrentSunrise",
+--						[""] = "CurrentSunset",
 						["winddir"] =  "CurrentWindBearing",
 						["units.windSpeed"] = "CurrentWindSpeed",
 						["units.windGust"] = "CurrentWindGust"
-					},
-					forecast = { 
+				}
+				local forecastMap = { 
 --						[""] = "Pressure",
 						["narrative"] = "Conditions",
 --						[""] = "Ozone",
-						["daypart.uvIndex"] = "uvIndex",
+						["daypart.1.uvIndex"] = "uvIndex",
 --						[""] = "Visibility",
 						["qpf"] = "PrecipIntensity",
 --						["precipIntensityMax"] = "PrecipIntensityMax",
-						["daypart.precipChance"] = "PrecipProbability",
-						["daypart.precipType"] = "PrecipType",
+						["daypart.1.precipChance"] = "PrecipProbability",
+						["daypart.1.precipType"] = "PrecipType",
 						["temperatureMax"] = "MaxTemp",
 						["temperatureMin"] = "MinTemp",
-						["daypart.temperatureHeatIndex"] = "ApparentMaxTemp",
-						["daypart.temperatureWindChill"] = "ApparentMinTemp",
-						["daypart.iconCode"] = "Icon",
-						["daypart.cloudCover"] = "CloudCover",
-						["dew_point"] = "DewPoint",
-						["daypart.relativeHumidity"] = "Humidity",
-						["daypart.windDirection"] =  "WindBearing",
-						["daypart.windSpeed"] = "WindSpeed",
+						["daypart.1.temperatureHeatIndex"] = "ApparentMaxTemp",
+						["daypart.1.temperatureWindChill"] = "ApparentMinTemp",
+						["daypart.1.iconCode"] = "Icon",
+						["daypart.1.cloudCover"] = "CloudCover",
+--						[""] = "DewPoint",
+						["sunriseTimeUtc"] = "Sunrise",
+						["sunsetTimeUtc"] = "Sunset",
+						["daypart.1.relativeHumidity"] = "Humidity",
+						["daypart.1.windDirection"] =  "WindBearing",
+						["daypart.1.windSpeed"] = "WindSpeed",
 --						[""] = "WindGust"
-					}
 				}
 				
-				-- Do nested key mapping
-				local function key_map(tkey, curItems)
-					local value = nil
-					if tkey:find("units.") then
-						tkey = tkey:gsub("units.", (MS.Units == "m" and "metric." or (MS.Units == "e" and "imperial." or "uk_hybrid.")))
-					end
-					if tkey:find("%.") then
-						-- Nested key in sub key
-						local key1,key2 = tkey:match("([%a_]-)%.([%a_]+)")
-						if key1 and key2 then
-							if curItems[key1] then
-								value = curItems[key1][key2]
-							end
-						end
-					else
-						value = curItems[tkey]
-					end 
-					return value
-				end
 				local varContainer = {}
 				-- Get the currently values we are interested in.
 				local curItems = data.observations[1]
+				-- We need to change string .units. in key to right value
+				local confMap = {
+					sub = {"units.", (MS.Units == "m" and "metric." or (MS.Units == "e" and "imperial." or (MS.Units == "s" and "metric_si." or "uk_hybrid.")))}
+				}
 				if curItems then
-					varContainer.currently = {}
-					local vc_cur = varContainer.currently
-					for tkey, varName in pairs(PR_VariablesMap.currently) do
-						-- See if complex mapping is needed
-						local value = key_map(tkey, curItems)
-						if not insert_value(vc_cur, varName, value) then
-							log.Debug("Currently key not found %s",tkey)
-						end
-					end
+					varContainer.currently = parse_input_day(curItems, currentlyMap, iconMap, confMap)
 				else
 					log.Warning("No current data")
 				end
@@ -835,45 +874,27 @@ local ProviderMap = {
 						log.Error("Wunder Ground API json decode error = %s", tostring(msg)) 
 						return false, "Invalid data"
 					end
-					local function fc_key_map(day, tkey, curItems)
-						local value = nil
-						if tkey:find("%.") then
-							-- Nested key in sub key
-							local key1,key2 = tkey:match("([%a_]-)%.([%a_]+)")
-							if key1 and key2 then
-								if key1 == "daypart" then
-									value = curItems[key1][1][key2]
-									if value then value = value[(day-1)*2+1] end
-								else
-									if curItems[key1] then
-										value = curItems[key1][key2]
-										if value then value = value[day] end
-									end	
-								end
-							end
-						else
-							value = curItems[tkey]
-							if value then value = value[day] end
-						end 
-						return value
-					end
 					
 					varContainer.forecast = {}
+					local curDay = data
 					for fd = 1, MS.ForecastDays do
-						varContainer.forecast[fd] = {}
-						local vc_for = varContainer.forecast[fd]
-						for tkey, varName in pairs(PR_VariablesMap.forecast) do
-							-- See if complex mapping is needed
-							local value = fc_key_map(fd, tkey, data)
-							if insert_value(vc_for, varName, value) then
-								if fd == 1 then
-									if varName == "Icon" and (not varContainer.currently[varName]) then
-										ti(varContainer.currently, {varName, value})
+						if curDay then
+							local confMap = {
+								ppf = function(key, value)
+									local res = value
+									if value then 
+										if key:find("daypart.1") then
+											res = value[(fd-1)*2+1]
+										else
+											res = value[fd]
+										end
 									end
+									return res
 								end
-							else
-								log.Debug("Daily %d key %s not found",fd,tkey)
-							end 
+							}
+							varContainer.forecast[fd] = parse_input_day(curDay, forecastMap, iconMap, confMap)
+						else
+							log.Warning("No daily data for day "..fd)
 						end
 					end
 				end
@@ -907,104 +928,71 @@ local ProviderMap = {
 					return false, res
 				end
 				-- this is the table used to map any providers output elements with the plugin variables
-				local PR_VariablesMap = {
-					currently = { 
+				local currentlyMap = { 
 						["feels_like"] = "CurrentApparentTemperature",
 						["clouds"] = "CurrentCloudCover",
 						["dew_point"] = "CurrentDewPoint",
 						["humidity"] = "CurrentHumidity",
-						["weather.icon"] = "Icon",
+						["weather.1.icon"] = "Icon",
 --						[""] = "CurrentOzone",
 						["uvi"] = "CurrentuvIndex",
-						["visibility"] = "CurrentVisibility",
-						["rain|snow"] = "CurrentPrecipIntensity",
+						["visibility"] = { name = "CurrentVisibility", multiplier = 0.001 },
+						["rain.1h|snow.1h"] = { name = "CurrentPrecipIntensity", default = 0 },
 --						[""] = "CurrentPrecipProbability",
-						["o|rain|snow"] = "CurrentPrecipType",
+						["o|rain|snow"] =  { name = "CurrentPrecipType", default = "None" },
 						["pressure"] = "CurrentPressure",
-						["weather.description"] = "CurrentConditions",
+						["weather.1.description"] = "CurrentConditions",
 						["temp"] = "CurrentTemperature",
 						["dt"] = "LastUpdate",
-						["wind_deg"] =  "CurrentWindBearing",
+						["sunrise"] = "CurrentSunrise",
+						["sunset"] = "CurrentSunset",
+						["wind_deg"] = "CurrentWindBearing",
 						["wind_speed"] = "CurrentWindSpeed",
 						["wind_gust"] = "CurrentWindGust"
-					},
-					forecast = { 
+					}
+				local forecastMap = { 
 						["pressure"] = "Pressure",
-						["weather.description"] = "Conditions",
+						["weather.1.description"] = "Conditions",
 --						[""] = "Ozone",
 						["uvi"] = "uvIndex",
-						["visibility"] = "Visibility",
-						["rain|snow"] = "PrecipIntensity",
+--						[""] = "Visibility",
+						["rain|snow"] = { name = "PrecipIntensity", default = 0 },
 --						[""] = "PrecipIntensityMax",
 						["pop"] = "PrecipProbability",
-						["o|rain|snow"] = "PrecipType",
+						["o|rain|snow"] = { name = "PrecipType", default = "None" },
 						["temp.max"] = "MaxTemp",
 						["temp.min"] = "MinTemp",
 						["temp.day"] = "HighTemp",
 						["temp.night"] = "LowTemp",
 						["feels_like.day"] = "ApparentMaxTemp",
 						["feels_like.night"] = "ApparentMinTemp",
-						["weather.icon"] = "Icon",
+						["weather.1.icon"] = "Icon",
 						["clouds"] = "CloudCover",
 						["dew_point"] = "DewPoint",
 						["humidity"] = "Humidity",
-						["wind_deg"] =  "WindBearing",
+						["sunrise"] = "Sunrise",
+						["sunset"] = "Sunset",
+						["wind_deg"] = "WindBearing",
 						["wind_speed"] = "WindSpeed",
 						["wind_gust"] = "WindGust"
-					}
 				}
 				local iconMap = {
-					["01d"] = 32,
-					["01n"] = 13,
-					["02d"] = 34,
-					["02n"] = 33,
-					["03d"] = 30,
-					["03n"] = 29,
-					["04d"] = 28,
-					["04n"] = 29,
-					["09d"] = 11,
-					["09n"] = 11,
-					["11d"] = 38,
-					["11n"] = 47,
-					["13d"] = 16,
-					["13n"] = 16,
-					["50d"] = 20,
-					["50n"] = 20
+					["01d"] = 32, ["01n"] = 13, ["02d"] = 34, ["02n"] = 33, ["03d"] = 30, ["03n"] = 29, ["04d"] = 28,
+					["04n"] = 29, ["09d"] = 11, ["09n"] = 11, ["11d"] = 38, ["11n"] = 47, ["13d"] = 16, ["13n"] = 16,
+					["50d"] = 20, ["50n"] = 20
 				}
-				-- Do nested key mapping
-				local function key_map(tkey, curItems)
-					local value = nil
-					if tkey:find("%.") then
-						-- Nested key in sub key
-						local key1,key2 = tkey:match("([%w_]-)%.([%w_]+)")
-						if key1 and key2 then 
-							if curItems[key1] then
-								if key1 == "weather" then
-									value = curItems[key1][1][key2]
-								else
-									value = curItems[key1][key2]
-								end
-							end
-						end
-					elseif tkey:find("|") then
-						if tkey:sub(1,2) == "o|" then
-							-- Use either key as value
-							local key1,key2 = tkey:match("o|([%w_]-)|([%w_]+)")
-							if curItems[key1] then
-								value = key1
-							elseif curItems[key2] then
-								value = key2
-							end
-						else
-							-- Get value of either key. If missing there is none, i.e. zero.
-							local key1,key2 = tkey:match("([%w_]-)|([%w_]+)")
-							value = curItems[key1] or curItems[key2] or 0
-						end
-					else
-						value = curItems[tkey]
-					end 
-					return value
-				end
+				local airMap = {
+					["components.o3"] = "CurrentOzone",
+					["components.co"] = "CurrentCO",
+					["components.no"] = "CurrentNO",
+					["components.no2"] = "CurrentNO2",
+					["components.so2"] = "CurrentSO2",
+					["components.nh3"] = "CurrentNH3",
+					["components.pm10"] = "CurrentPM10",
+					["components.pm2_5"] = "CurrentPM25",
+					["main.aqi"] = "CurrentAirQuality"
+				}
+
 				log.Debug(res)
 				local data, err = json.decode(res)
 				if not data then
@@ -1015,15 +1003,7 @@ local ProviderMap = {
 				-- Get the currently values we are interested in.
 				local curItems = data.current
 				if curItems then
-					varContainer.currently = {}
-					local vc_cur = varContainer.currently
-					for tkey, varName in pairs(PR_VariablesMap.currently) do
-						-- See if complex mapping is needed
-						local value = key_map(tkey, curItems)
-						if not insert_value(vc_cur, varName, value, iconMap) then
-							log.Debug("Currently key not found %s",tkey)
-						end
-					end
+					varContainer.currently = parse_input_day(curItems, currentlyMap, iconMap)
 				else
 					log.Warning("No current data")
 				end
@@ -1033,15 +1013,7 @@ local ProviderMap = {
 					for fd = 1, MS.ForecastDays do
 						local curDay = data.daily[fd]
 						if curDay then
-							varContainer.forecast[fd] = {}
-							local vc_for = varContainer.forecast[fd]
-							for tkey, varName in pairs(PR_VariablesMap.forecast) do
-								-- See if complex mapping is needed
-								local value = key_map(tkey, curDay)
-								if not insert_value(vc_for, varName, value, iconMap) then
-									log.Debug("Daily %d key %s not found",fd,tkey)
-								end 
-							end
+							varContainer.forecast[fd] = parse_input_day(curDay, forecastMap, iconMap)
 						else
 							log.Warning("No daily data for day "..fd)
 						end
@@ -1059,19 +1031,6 @@ local ProviderMap = {
 					log.Error("OpenWeather API call failed with http code = %s", tostring(retcode))
 					return true, varContainer
 				end
-				-- this is the table used to map any providers output elements with the plugin variables
-				local PR_VariablesMapAQ = {
-					currently = { 
-						["components.o3"] = "CurrentOzone",
-						["components.co"] = "CurrentCO",
-						["components.no"] = "CurrentNO",
-						["components.no2"] = "CurrentNO2",
-						["components.so2"] = "CurrentSO2",
-						["components.nh3"] = "CurrentNH3",
-						["components.pm10"] = "CurrentPM10",
-						["components.pm2_5"] = "CurrentPM25",
-						["main.aqi"] = "CurrentAirQuality"
-					}}
 				log.Debug(res)
 				local data, err = json.decode(res)
 				if not data then
@@ -1081,18 +1040,25 @@ local ProviderMap = {
 				-- Get the currently values we are interested in.
 				local curItems = data.list
 				if curItems then curItems = data.list[1] end
-				log.Debug(json.encode(curItems))
 				if curItems then
-					local vc_cur = varContainer.currently
-					for tkey, varName in pairs(PR_VariablesMapAQ.currently) do
-						-- See if complex mapping is needed
-						local value = key_map(tkey, curItems)
-						if not insert_value(vc_cur, varName, value, iconMap) then
-							log.Debug("Currently key not found %s",tkey)
+					local ti = table.insert
+					local confMap = { 
+						ppf = function(key,value)
+							local res = value
+							if key == "main.aqi" then
+								local map = {"Good","Fair","Moderate","Poor","Very Poor"}
+								res = map[value]
+							end
+							return res
 						end
+					}
+					local aqt = parse_input_day(curItems, airMap, nil, confMap)
+					-- Merge with currently data
+					for _, value in ipairs(aqt) do
+						ti(varContainer.currently, value)
 					end
 				else
-					log.Warning("No current data")
+					log.Warning("No air quality data")
 				end
 				return true, varContainer
 			end
@@ -1152,8 +1118,7 @@ local ProviderMap = {
 					log.Error("AccuWeather API json decode error = %s", tostring(err))
 					return false, "Invalid data"
 				end
-				local PR_VariablesMap = {
-					currently = { 
+				local currentlyMap = { 
 						["ApparentTemperature.units.Value"] = "CurrentApparentTemperature",
 						["CloudCover"] = "CurrentCloudCover",
 						["DewPoint.units.Value"] = "CurrentDewPoint",
@@ -1162,27 +1127,29 @@ local ProviderMap = {
 --						[""] = "CurrentOzone",
 						["UVIndex"] = "CurrentuvIndex",
 						["Visibility.units.Value"] = "CurrentVisibility",
-						["Precip1hr.units.Value"] = "CurrentPrecipIntensity",
+						["Precip1hr.units.Value"] = {name = "CurrentPrecipIntensity", default = 0},
 --						[""] = "CurrentPrecipProbability",
-						["PrecipitationType"] = "CurrentPrecipType",
+						["PrecipitationType"] = {name = "CurrentPrecipType", default = "None"},
 						["Pressure.units.Value"] = "CurrentPressure",
 						["WeatherText"] = "CurrentConditions",
 						["Temperature.units.Value"] = "CurrentTemperature",
 						["EpochTime"] = "LastUpdate",
+--						[""] = "CurrentSunrise",
+--						[""] = "CurrentSunset",
 						["Wind.Direction.Degrees"] =  "CurrentWindBearing",
 						["Wind.Speed.units.Value"] = "CurrentWindSpeed",
 						["WindGust.Speed.units.Value"] = "CurrentWindGust"
-					},
-					forecast = { 
+				}
+				local forecastMap = { 
 --						[""] = "Pressure",
 						["Day.ShortPhrase"] = "Conditions",
 --						[""] = "Ozone",
 --						[""] = "uvIndex",
 --						[""] = "Visibility",
-						["Day.PrecipitationIntensity"] = "PrecipIntensity",
+						["Day.PrecipitationIntensity"] = {name = "PrecipIntensity", default = 0},
 						["Day.TotalLiquid.Value"] = "PrecipIntensityMax",
 						["Day.PrecipitationProbability"] = "PrecipProbability",
-						["Day.PrecipitationType"] = "PrecipType",
+						["Day.PrecipitationType"] = {name = "PrecipType", default = "None"},
 						["Temperature.Maximum.Value"] = "MaxTemp",
 						["Temperature.Minimum.Value"] = "MinTemp",
 --						[""] = "HighTemp",
@@ -1193,102 +1160,37 @@ local ProviderMap = {
 						["Day.CloudCover"] = "CloudCover",
 --						[""] = "DewPoint",
 --						[""] = "Humidity",
+						["Sun.Rise"] = "Sunrise",
+						["Sun.Set"] = "Sunset",
 						["Day.Wind.Direction.Degrees"] =  "WindBearing",
 						["Day.Wind.Speed.Value"] = "WindSpeed",
 						["Day.WindGust.Speed.Value"] = "WindGust"
-					},
 				}
 				local iconMap = {
-					[1] = 32,
-					[2] = 34,
-					[3] = 30,
-					[4] = 30,
-					[5] = 21,
-					[6] = 28,
-					[7] = 26,
-					[8] = 26,
-					[11] = 20,
-					[12] = 11,
-					[13] = 39,
-					[14] = 39,
-					[15] = 4,
-					[16] = 38,
-					[17] = 37,
-					[18] = 12,
-					[19] = 13,
-					[20] = 13,
-					[21] = 13,
-					[22] = 16,
-					[23] = 41,
-					[24] = 10,
-					[25] = 18,
-					[26] = 10,
-					[29] = 5,
-					[30] = 36,
-					[31] = 44,
-					[32] = 24,
-					[33] = 31,
-					[34] = 33,
-					[35] = 29,
-					[36] = 33,
-					[37] = 33,
-					[38] = 27,
-					[39] = 12,
-					[40] = 12,
-					[41] = 47,
-					[42] = 47,
-					[43] = 13,
-					[44] = 13
+					[1] = 32, [2] = 34, [3] = 30, [4] = 30, [5] = 21, [6] = 28, [7] = 26, [8] = 26, [11] = 20,
+					[12] = 11, [13] = 39, [14] = 39, [15] = 4, [16] = 38, [17] = 37, [18] = 12, [19] = 13, [20] = 13,
+					[21] = 13, [22] = 16, [23] = 41, [24] = 10, [25] = 18, [26] = 10, [29] = 5, [30] = 36, [31] = 44,
+					[32] = 24, [33] = 31, [34] = 33, [35] = 29, [36] = 33, [37] = 33, [38] = 27, [39] = 12, [40] = 12,
+					[41] = 47, [42] = 47, [43] = 13, [44] = 13
 				}
 
-				-- Do nested key mapping
-				local function key_map(tkey, curItems)
-					local value = nil
-					if tkey:find(".units.") then
-						tkey = tkey:gsub(".units.", (MS.Units == "m" and ".Metric." or ".Imperial."))
-					end
-					if tkey:find("%.") then
-						-- Nested key in sub key
-						local key1,key2 = tkey:match("([%a_]-)%.([%a_%.]+)")
-						if key1 and key2 then
-							if curItems[key1] then
-								if key2:find("%.") then
-									local key2,key3 = key2:match("([%a_]-)%.([%a_%.]+)")
-									if key2 and key3 then
-										if curItems[key1][key2] then
-											if key3:find("%.") then
-												local key3,key4 = key3:match("([%a_]-)%.([%a_]+)")
-												if curItems[key1][key2][key3] then
-													value = curItems[key1][key2][key3][key4]
-												end	
-											else
-												value = curItems[key1][key2][key3]
-											end
-										end
-									end
-								else
-									value = curItems[key1][key2]
-								end
-							end
-						end
-					else
-						value = curItems[tkey]
-					end 
-					return value
-				end
 				local varContainer = {}
 				-- Get the currently values we are interested in.
 				local curItems = data[1]
-				if curItems then
-					varContainer.currently = {}
-					local vc_cur = varContainer.currently
-					for tkey, varName in pairs(PR_VariablesMap.currently) do
-						-- See if complex mapping is needed
-						local value = key_map(tkey, curItems)
-						if not insert_value(vc_cur, varName, value, iconMap) then
-							log.Debug("Currently key not found %s",tkey)
+				-- We need to change string .units. in key to right value
+				local confMap = {
+					sub = {".units.", (MS.Units == "m" and ".Metric." or ".Imperial.")},
+					ppf = function(key, value)
+						local res = value
+						if value and key:find("Sun.") then
+							local y,m,d,h,n,s = string.match(value,"(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)")
+							res = os.time({year=y,month=m,day=d,hour=h,min=n,sec=s})
 						end
+						return res
 					end
+				}
+				if curItems then
+					varContainer.currently = parse_input_day(curItems, currentlyMap, iconMap, confMap)
 				else
 					log.Warning("No current data")
 				end
@@ -1320,18 +1222,11 @@ local ProviderMap = {
 						return false, "Invalid data"
 					end
 					varContainer.forecast = {}
+					confMap.sub = nil
 					for fd = 1, MS.ForecastDays do
 						local curDay = data.DailyForecasts[fd]
 						if curDay then
-							varContainer.forecast[fd] = {}
-							local vc_for = varContainer.forecast[fd]
-							for tkey, varName in pairs(PR_VariablesMap.forecast) do
-								-- See if complex mapping is needed
-								local value = key_map(tkey, curDay)
-								if not insert_value(vc_for, varName, value, iconMap) then
-									log.Debug("Daily %d key %s not found",fd,tkey)
-								end 
-							end
+							varContainer.forecast[fd] = parse_input_day(curDay, forecastMap, iconMap, confMap)
 						else
 							log.Warning("No daily data for day "..fd)
 						end
@@ -1366,8 +1261,7 @@ local ProviderMap = {
 				end
 				
 				-- this is the table used to map any providers output elements with the plugin variables
-				local PR_VariablesMap = {
-					currently = { 
+				local currentlyMap = { 
 						["feelsLike"] = "CurrentApparentTemperature",
 --						[""] = "CurrentCloudCover",
 						["dewPoint"] = "CurrentDewPoint",
@@ -1386,11 +1280,10 @@ local ProviderMap = {
 						["winddir"] =  "CurrentWindBearing",
 						["windspeedmph"] = "CurrentWindSpeed",
 						["windgustmph"] = "CurrentWindGust"
-					},
-					forecast = { 
+				}
+				local forecastMap = { 
 						-- No forcecast data provided.
 						--https://ambientweather.com/amweatherbridge.html
-					}
 				}
 				log.Debug(res)
 				local data, err = json.decode(res)
@@ -1417,14 +1310,7 @@ local ProviderMap = {
 				-- Get the currently values we are interested in.
 				if curItems then curItems = curItems.lastData end
 				if curItems then
-					varContainer.currently = {}
-					local vc_cur = varContainer.currently
-					for tkey, varName in pairs(PR_VariablesMap.currently) do
-						local value = curItems[tkey]
-						if not insert_value(vc_cur, varName, value) then
-							log.Debug("Currently key not found %s",tkey)
-						end     
-					end
+					varContainer.currently = parse_input_day(curItems, currentlyMap, iconMap)
 				else
 					log.Warning("No currently data")
 				end
@@ -1449,13 +1335,108 @@ local ProviderMap = {
 	[311] = {	name = "KNMI (NL)",
 			init = function()
 				-- Check for required settings
+				complete = MS.Latitude ~= "" and MS.Longitude ~= "" and MS.Key ~= ""
+				if not complete then
+					var.Set("DisplayLine1", "Complete settings first.", SID_AltUI)
+					log.Error("KNMI setup is not completed.")
+				end	
 				var.Set("ProvderName", "KNMI")
-				var.Set("ProvderURL", "www.knmi.nl")
-				return MS.Latitude ~= "" and MS.Longitude ~= ""
+				var.Set("ProvderURL", "www.weerlive.nl")
+				return complete
 			end, 
 			update = function()
-				local urltemplate = ""
-				return false, "Not implemented"
+				local urltemplate = "http://weerlive.nl/api/json-data-10min.php?key=%s&locatie=%s,%s"
+				local url = string.format(urltemplate, MS.Key, MS.Latitude, MS.Longitude)
+				log.Debug("calling Weerlive API with url = %s", url)
+				local wdata, retcode, headers, res = HttpsGet(url)
+				local err = (retcode ~=200)
+				if err then -- something wrong happened (website down, wrong key or location)
+					log.Error("Weerlive API call failed with http code = %s", tostring(retcode))
+					return false, res
+				end
+				-- this is the table used to map any providers output elements with the plugin variables
+				local currentlyMap = { 
+						["gtemp"] = "CurrentApparentTemperature",
+						["clouds"] = "CurrentCloudCover",
+						["dauwp"] = "CurrentDewPoint",
+						["lv"] = "CurrentHumidity",
+						["image"] = "Icon",
+--						[""] = "CurrentOzone",
+--						[""] = "CurrentuvIndex",
+						["zicht"] = "CurrentVisibility",
+--						[""] = "CurrentPrecipIntensity",
+--						[""] = "CurrentPrecipProbability",
+--						[""] = "CurrentPrecipType",
+						["luchtd"] = "CurrentPressure",
+						["samenv"] = "CurrentConditions",
+						["temp"] = "CurrentTemperature",
+--						[""] = "LastUpdate",
+						["windr"] =  "CurrentWindDirection",
+--						[""] =  "CurrentWindBearing",
+						["winds"] = "CurrentWindSpeed"
+--						[""] = "CurrentWindGust"
+				}
+				local forecastMap = { 
+						["pressure"] = "Pressure",
+--						[""] = "Conditions",
+--						[""] = "Ozone",
+--						[""] = "uvIndex",
+--						[""] = "Visibility",
+--						[""] = "PrecipIntensity",
+--						[""] = "PrecipIntensityMax",
+						["neerslag"] = "PrecipProbability",
+						["zon"] = "SunProbability",
+--						[""] = "PrecipType",
+						["tmax"] = "MaxTemp",
+						["tmin"] = "MinTemp",
+--						[""] = "HighTemp",
+--						[""] = "LowTemp",
+--						[""] = "ApparentMaxTemp",
+--						[""] = "ApparentMinTemp",
+						["weer"] = "Icon",
+--						[""] = "CloudCover",
+--						[""] = "DewPoint",
+--						[""] = "Humidity",
+						["windr"] =  "WindDirection",
+--						[""] =  "WindBearing",
+						["windk"] = "WindSpeed"
+--						[""] = "WindGust"
+				}
+				local iconMap = {
+					["zonnig"] = 32, ["bliksem"] = 4, ["regen"] = 12, ["buien"] = 11, ["hagel"] = 17, ["mist"] = 20, ["sneeuw"] = 16,
+					["bewolkt"] = 29, ["halfbewolkt"] = 30, ["zwaarbewolkt"] = 26, ["nachtmist"] = 20, ["helderenacht"] = 31, ["wolkennacht"] = 27
+				}
+				log.Debug(res)
+				local data, err = json.decode(res)
+				if not data then
+					log.Error("Weerlive API json decode error = %s", tostring(err)) 
+					return false, "Invalid data"
+				end
+				local varContainer = {}
+				-- Get the currently values we are interested in.
+				local curItems = data.liveweer
+				if curItems then curItems = curItems[1] end
+				if curItems then
+					varContainer.currently = parse_input_day(curItems, currentlyMap, iconMap)
+				else
+					log.Warning("No current data")
+				end
+				-- Get the forecast data the user wants
+				if MS.ForecastDays > 0 then
+					varContainer.forecast = {}
+					for fd = 1, MS.ForecastDays do
+						local curDay = curItems
+						local confMap = { prfx = "d"..fd }
+						if curDay then
+							varContainer.forecast[fd] = parse_input_day(curDay, forecastMap, iconMap, confMap)
+						else
+							log.Warning("No daily data for day "..fd)
+						end
+					end
+				else
+					log.Debug("No forecast data configured")
+				end
+				return true, varContainer
 			end
 		},
 	[312] = {
@@ -1477,13 +1458,12 @@ local ProviderMap = {
 					return false, err
 				end
 				-- this is the table used to map any providers output elements with the plugin variables
-				local PR_VariablesMap = {
-					currently = { 
+				local currentlyMap = { 
 						["feeltemperature"] = "CurrentApparentTemperature",
 						["humidity"] = "CurrentHumidity",
 						["graphUrl"] = "Icon",
 						["sunpower"] = { name = "CurrentuvIndex", multiplier = 0.01 },
-						["visibility"] = { name = "CurrentVisibility", multiplier = 0.0001 },
+						["visibility"] = { name = "CurrentVisibility", multiplier = 0.001 },
 						["precipitation"] = "CurrentPrecipIntensity",
 						["airpressure"] = "CurrentPressure",
 						["temperature"] = "CurrentTemperature",
@@ -1493,8 +1473,8 @@ local ProviderMap = {
 						["windspeed"] = "CurrentWindSpeed",
 						["windgusts"] = "CurrentWindGust",
 						["weatherdescription"] = "CurrentConditions"
-					},
-					forecast = { 
+				}
+				local forecastMap = { 
 						["weatherdescription"] = "Conditions",
 						["sunChance"] = "SunChange",
 						["mmRainMin"] = "PrecipIntensity",
@@ -1504,53 +1484,13 @@ local ProviderMap = {
 						["mintemperatureMin"] = "MinTemp",
 						["windDirection"] =  "WindDirection",
 						["wind"] = "WindSpeed",
-					}
 				}
 				local iconMap = {
-					["a"] = 32,
-					["b"] = 34,
-					["c"] = 26,
-					["d"] = 20,
-					["f"] = 39,
-					["g"] = 38,
-					["h"] = 39,
-					["i"] = 14,
-					["j"] = 30,
-					["k"] = 39,
-					["l"] = 40,
-					["m"] = 40,
-					["n"] = 20,
-					["o"] = 30,
-					["p"] = 26,
-					["q"] = 40,
-					["r"] = 30,
-					["s"] = 4,
-					["t"] = 14,
-					["u"] = 13,
-					["v"] = 16,
-					["w"] = 5,
-					["aa"] = 31,
-					["bb"] = 33,
-					["cc"] = 26,
-					["dd"] = 20,
-					["ff"] = 45,
-					["gg"] = 47,
-					["hh"] = 45,
-					["ii"] = 14,
-					["jj"] = 29,
-					["kk"] = 45,
-					["ll"] = 40,
-					["mm"] = 40,
-					["nn"] = 20,
-					["oo"] = 29,
-					["pp"] = 26,
-					["qq"] = 40,
-					["rr"] = 29,
-					["ss"] = 4,
-					["tt"] = 14,
-					["uu"] = 13,
-					["vv"] = 16,
-					["ww"] = 5,
+					["a"] = 32, ["b"] = 34, ["c"] = 26, ["d"] = 20, ["f"] = 39, ["g"] = 38, ["h"] = 39, ["i"] = 14, ["j"] = 30, ["k"] = 39,
+					["l"] = 40, ["m"] = 40, ["n"] = 20, ["o"] = 30, ["p"] = 26, ["q"] = 40, ["r"] = 30, ["s"] = 4, ["t"] = 14, ["u"] = 13,
+					["v"] = 16, ["w"] = 5, ["aa"] = 31, ["bb"] = 33, ["cc"] = 26, ["dd"] = 20, ["ff"] = 45, ["gg"] = 47, ["hh"] = 45,
+					["ii"] = 14, ["jj"] = 29, ["kk"] = 45, ["ll"] = 40, ["mm"] = 40, ["nn"] = 20, ["oo"] = 29, ["pp"] = 26, ["qq"] = 40,
+					["rr"] = 29, ["ss"] = 4, ["tt"] = 14, ["uu"] = 13, ["vv"] = 16, ["ww"] = 5,
 				}
 				log.Debug(res)
 				local data, err = json.decode(res)
@@ -1558,16 +1498,17 @@ local ProviderMap = {
 					log.Error("Buienradar API json decode error = %s", tostring(err)) 
 					return false, "Invalid data"
 				end
-				local ti = table.insert
 				local varContainer = {}
 				-- Get the currently values we are interested in.
-				local curItems = data.actual.stationmeasurements
-				if curItems then
+				local stations = data.actual.stationmeasurements
+				local curItems = nil
+				if stations then
 					-- Find station to use and collect curent availble stations
 					local stationID = MS.StationID
 					if stationID == 0 then stationID = defaultStationID end -- Default is De Bilt
 					local stationList = {}
-					for _, station in ipairs(curItems) do
+					local ti = table.insert
+					for _, station in ipairs(stations) do
 						ti(stationList, {v = station["stationid"], l = station["stationname"]})
 						if station["stationid"] == stationID then
 							curItems = station
@@ -1576,27 +1517,25 @@ local ProviderMap = {
 					var.Set("StationList", json.encode(stationList))
 				end
 				if curItems then
-					varContainer.currently = {}
-					local vc_cur = varContainer.currently
-					for tkey, varName in pairs(PR_VariablesMap.currently) do
-						local value = curItems[tkey]
-						if value then
-							if tkey == "graphUrl" then
+					local confMap = { 
+						ppf = function(key, value)
+							local res = value
+							if key == "graphUrl" then
 								-- Map icon url, to icon value
-								local icn_str = string.sub(value, -2)
-								if string.sub(icn_str,1,1) == "/" then
-									icn_str = string.sub(icn_str,2)
+								local ssub = string.sub
+								local icn_str = ssub(value, -2)
+								if ssub(icn_str,1,1) == "/" then
+									icn_str = ssub(icn_str,2)
 								end
-								value = icn_str
-							elseif tkey == "timestamp" then
+								res = icn_str
+							elseif key == "timestamp" then
 								local y,m,d,h,n,s = string.match(value,"(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)")
-								value = os.time({year=y,month=m,day=d,hour=h,min=n,sec=s})
+								res = os.time({year=y,month=m,day=d,hour=h,min=n,sec=s})
 							end
-							insert_value(vc_cur, varName, value, iconMap)
-						else
-							log.Debug("Currently key not found %s",tkey)
-						end     
-					end
+							return res
+						end
+					}
+					varContainer.currently = parse_input_day(curItems, currentlyMap, iconMap, confMap)
 				else
 					log.Warning("No currently data")
 				end
@@ -1606,13 +1545,7 @@ local ProviderMap = {
 					for fd = 1, MS.ForecastDays do
 						local curDay = data.forecast.fivedayforecast[fd]
 						if curDay then
-							varContainer.forecast[fd] = {}
-							local vc_for = varContainer.forecast[fd]
-							for tkey, varName in pairs(PR_VariablesMap.forecast) do
-								if not insert_value(vc_for, varName, curDay[tkey]) then
-									log.Debug("Daily %d key %s not found",fd,tkey)
-								end     
-							end
+							varContainer.forecast[fd] = parse_input_day(curDay, forecastMap, iconMap)
 						else
 							log.Warning("No daily data for day "..fd)
 						end
@@ -1680,10 +1613,10 @@ function MS_UpdateMultiDataItem(data)
 		var.Set("DisplayLine2", sf("Bearing %d ",wb), SID_AltUI, ID)
 	elseif item == "Q" then
 		log.Debug("Updating air quality data for child device "..ID)
-		local aqi = var.GetNumber("CurrentAirQuality")
+		local aqi = var.Get("CurrentAirQuality")
 		local pm10 = var.GetNumber("CurrentPM10")
 		local pm25 = var.GetNumber("CurrentPM25")
-		var.Set("DisplayLine1", sf("Air Qual. Ind. %d",aqi), SID_AltUI, ID)
+		var.Set("DisplayLine1", sf("Air Qual. Ind. %s",aqi), SID_AltUI, ID)
 		var.Set("DisplayLine2", sf("Fine part. %.2f, Coarse part. %.2f",pm25,pm10), SID_AltUI, ID)
 	elseif item == "X" then
 		log.Debug("Updating air quality 2 data for child device "..ID)
@@ -1753,6 +1686,10 @@ local function MS_GetData()
 				else
 					log.Error("Provider tries to update incomplete currently variable %s.", var or "missing")
 				end
+			end
+			-- If no update time from provider, use now.
+			if not curData.LastUpdate then
+				var.Set("LastUpdate", os.time())
 			end
 		else
 			log.Error("No currently data")

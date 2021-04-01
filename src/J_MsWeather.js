@@ -2,7 +2,7 @@
 /* 
 	MsWeather Hub Control UI
 	Written by R.Boer. 
-	V1.0 27 March 2021
+	V1.1 1 April 2021
 */
 var MsWeather = (function (api) {
 
@@ -16,14 +16,15 @@ var MsWeather = (function (api) {
 	var providersConf = [				// Provider configurations.
 		{ id:1, name:'DarkSky', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['auto','si','us','ca','uk2'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[1,2,3,4,5,6,7,8,9,10], period:[300,3600] },
 		{ id:2, name:'Weather Underground', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','s','h'], language:true, childTypes:'TDHPAOUVWR', displayTypes:[2,3,4,5,6,7,8,9,10],period:[60,3600] },
-		{ id:3, name:'OpenWeather', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['metric','imperial','standard'], language:true, childTypes:'TDHOPAUWRQX', displayTypes:[1,2,3,4,5,6,7,8,9,10,11,12],period:[60,3600] },
+		{ id:3, name:'OpenWeather', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:7, units:['metric','imperial','standard'], language:true, childTypes:'TDHOPAUVWRQX', displayTypes:[1,2,3,4,5,6,7,8,9,10,11,12],period:[60,3600] },
 		{ id:4, name:'Accu Weather', active:true, key:true, appkey:false, latlon:true, station:true, fcDays:7, units:['e','m','h'], language:true, childTypes:'TAUWR', displayTypes:[1,3,4,6,7,8,9],period:[1800,3600,7200] },
 		{ id:5, name:'AmbientWeather', active:true, key:true, appkey:true, latlon:false, station:'StationList,0,Device 1', fcDays:7, units:['imperial'], language:false, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,10],period:[10,3600] },
 		{ id:6, name:'PWS Weather', active:false, key:true, appkey:true, latlon:false, station:'StationList,0,Device 1', fcDays:7, units:['imperial'], language:false, childTypes:'TDHPAUWR', displayTypes:[2,3,4,6,7,10],period:[10,3600] },
+		{ id:311, name:'KNMI (NL)', active:true, key:true, appkey:false, latlon:true, station:false, fcDays:3, units:false, language:false, childTypes:'THPAVW', displayTypes:[1,2,3,4,6,7,10],period:[600,3600] },
 		{ id:312, name:'Buienradar (NL)', active:true, key:false, appkey:false, latlon:false, station:'StationList,6260,Meetstation De Bilt', fcDays:5, units:false, language:false, childTypes:'THPAUV', displayTypes:[1,2,3,4,6,7],period:[60,3600] }
 	];
 	var forecastOptions = [{v:0,l:'No forecast'},{v:1,l:'One day'},{v:2,l:'Two days'},{v:3,l:'Three days'},{v:4,l:'Four days'},{v:5,l:'Five days'},{v:6,l:'Six days'},{v:7,l:'Seven days'}];
-	var periodOptions = [{v:60,l:'1 minute'},{v:300,l:'5 minutes'},{v:900,l:'15 minutes'},{v:1800,l:'30 minutes'},{v:3600,l:'1 hour'},{v:7200,l:'2 hours'},{v:10800,l:'3 hours'}];
+	var periodOptions = [{v:60,l:'1 minute'},{v:300,l:'5 minutes'},{v:600,l:'10 minutes'},{v:900,l:'15 minutes'},{v:1800,l:'30 minutes'},{v:3600,l:'1 hour'},{v:7200,l:'2 hours'},{v:10800,l:'3 hours'}];
 	var childDeviceOptions = [{v:'T',l:'Temperature'},{v:'D',l:'Dewpoint'},{v:'H',l:'Humidity'},{v:'P',l:'Pressure'},{v:'A',l:'Apparent Temperature'},{v:'O',l:'Ozone'},{v:'U',l:'UV Index'},{v:'V',l:'Visibility'},{v:'W',l:'Wind Data'},{v:'R',l:'Percipipation Data'},{v:'Q',l:'Air Quality'},{v:'X',l:'Air Quality Details'}];
 	var displayOptions = [{v:1,l:'Current Conditions'},{v:2,l:'Current Pressure'},{v:3,l:'Last Update'},{v:4,l:'Wind Speed, Gust and Bearing'},{v:5,l:'Ozone and UV Index'},{v:6,l:'Current Temperature'},{v:7,l:'Apparent Temperature'},{v:8,l:'Current Cloud Cover'},{v:9,l:'Percipipation Type, Probability and Intensity'},{v:10,l:'Humidity and Dew Point'},{v:11,l:'Air Quality'},{v:12,l:'Air Quality Details'}];
 	var unitOptions = [{v:'auto',l:'Auto'},{v:'si',l:'System International'},{v:'us',l:'Imperial'},{v:'ca',l:'Canadian'},{v:'uk2',l:'British'},{v:'standard',l:'Standard'},{v:'metric',l:'Metric'},{v:'imperial',l:'Imperial'},{v:'s',l:'System International'},{v:'e',l:'Imperial'},{v:'m',l:'Metric'},{v:'h',l:'British'}];
@@ -222,7 +223,7 @@ var MsWeather = (function (api) {
 					.text(options.text));
 			});
 			if (provCnf.units !== false) {
-				// Build forecast days list
+				// Build units list
 				var unMap = [];
 				ll = unitOptions.length;
 				for(i=0;i<ll;i++){
@@ -231,6 +232,7 @@ var MsWeather = (function (api) {
 					}
 				}
 				var cun = varGet(deviceID, 'Units');
+				if (cun == "") { cun = unMap[0].value; }
 				var $unl = $('#'+DIV_PREFIX+'Units'+deviceID);
 				$unl.empty();
 				$.each(unMap, function(index,options) {
@@ -241,7 +243,7 @@ var MsWeather = (function (api) {
 				});
 			}
 			if (provCnf.language !== false) {
-				// Build forecast days list
+				// Build language list
 				var lgMap = [];
 				ll = languageOptions.length;
 				for(i=0;i<ll;i++){
@@ -250,6 +252,7 @@ var MsWeather = (function (api) {
 					}
 				}
 				var clg = varGet(deviceID, 'Language');
+				if (clg == "") { clg = "en"; }
 				var $lgl = $('#'+DIV_PREFIX+'Language'+deviceID);
 				$lgl.empty();
 				$.each(lgMap, function(index,options) {
@@ -274,6 +277,7 @@ var MsWeather = (function (api) {
 					stMap.push({value:st[1], text:st[2]});
 				}
 				var cst = varGet(deviceID, 'StationID');
+				if (cst == "") { cst = st[1]; }
 				var $stl = $('#'+DIV_PREFIX+'StationID'+deviceID);
 				$stl.empty();
 				$.each(stMap, function(index,options) {
