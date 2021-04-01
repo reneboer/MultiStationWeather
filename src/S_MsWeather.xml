@@ -2,7 +2,7 @@
 <!-- 
 	Module S_MsWeather.xml
 	Written by R.Boer. 
-	V1.0, 27 March 2021
+	V1.1, 2 April 2021
 -->
 <scpd xmlns="urn:schemas-upnp-org:service-1-0">
 	<specVersion>
@@ -97,6 +97,10 @@
 		<stateVariable sendEvents="yes"><name>CurrentWindSpeed</name>
 			<dataType>float</dataType>
 			<shortCode>CurrentWindSpeed</shortCode>
+		</stateVariable>
+		<stateVariable sendEvents="yes"><name>CurrentWindGust</name>
+			<dataType>float</dataType>
+			<shortCode>CurrentWindGust</shortCode>
 		</stateVariable>
 		<stateVariable sendEvents="yes"><name>CurrentAirQuality</name>
 			<dataType>string</dataType>

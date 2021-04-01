@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<scpd xmlns="urn:schemas-upnp-org:service-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <serviceStateTable>
+      <stateVariable>
+         <name>CurrentLevel</name>
+         <sendEventsAttribute>yes</sendEventsAttribute>
+         <dataType>i4</dataType>
+        <shortCode>CurrentLevel</shortCode>
+      </stateVariable>
+      <stateVariable>
+         <name>DisplayLine1</name>
+         <sendEventsAttribute>no</sendEventsAttribute>
+         <dataType>string</dataType>
+        <shortCode>DisplayLine1</shortCode>
+      </stateVariable>
+      <stateVariable>
+         <name>DisplayLine2</name>
+         <sendEventsAttribute>no</sendEventsAttribute>
+         <dataType>string</dataType>
+        <shortCode>DisplayLine2</shortCode>
+      </stateVariable>
+   </serviceStateTable>
+</scpd>

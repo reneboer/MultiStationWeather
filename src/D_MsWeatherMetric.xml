@@ -2,7 +2,7 @@
 <!-- 
 	Module D_MsWeatherMetric.xml
 	Written by R.Boer. 
-	V1.0, 22 March 2021
+	V1.1, 1 April 2021
 -->
 <root xmlns="urn:schemas-upnp-org:device-1-0">
 	<specVersion>
@@ -11,7 +11,7 @@
 	</specVersion>
 	<device>
 		<deviceType>urn:schemas-rboer-com:device:WeatherMetric:1</deviceType>
-		<Category_Num>12</Category_Num>
+		<Category_Num>25</Category_Num>
 		<SubCategory_Num>0</SubCategory_Num>
 		<staticJson>D_MsWeatherMetric.json</staticJson> 
 		<friendlyName>Multi Weather Station Sensor</friendlyName>
@@ -20,9 +20,9 @@
 		<UDN>uuid:000000000000</UDN>
 		<serviceList>
 			<service>
-				<serviceType>urn:schemas-micasaverde-com:service:GenericSensor:1</serviceType>
-				<serviceId>urn:micasaverde-com:serviceId:GenericSensor1</serviceId>
-				<SCPDURL>S_GenericSensor1.xml</SCPDURL>
+				<serviceType>urn:schemas-rboer-com:service:WeatherMetric:1</serviceType>
+				<serviceId>urn:upnp-rboer-com:serviceId:WeatherMetric1</serviceId>
+				<SCPDURL>S_MsWeatherMetric.xml</SCPDURL>
 			</service>
 		</serviceList>
 	</device>

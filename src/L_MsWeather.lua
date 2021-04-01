@@ -9,6 +9,7 @@ Icons based on Wunderground. Information : https://docs.google.com/document/d/1q
 
 Version 1.1 2021-04-1
 	- Added KNMI (weerlive, NL) weather provider
+	- No longer using S_GenericSensor.xml as it limits SDATA possibilities
 	- Fix for Precipitation update
 	- Fix for Wundergrouns metric_si units
 	- More generic functions, less code per provider
@@ -44,6 +45,7 @@ pcall(function()
 end)
 
 local SID_Weather 	= "urn:upnp-rboer-com:serviceId:Weather1"
+local SID_WeatherM 	= "urn:upnp-rboer-com:serviceId:WeatherMetric1"
 local SID_Security 	= "urn:micasaverde-com:serviceId:SecuritySensor1"
 local SID_Humid 	= "urn:micasaverde-com:serviceId:HumiditySensor1"
 local SID_UV	 	= "urn:micasaverde-com:serviceId:LightSensor1"
@@ -180,16 +182,16 @@ local SensorInfo = setmetatable (
     ['T'] = { deviceXML = "D_TemperatureSensor1.xml", serviceId = SID_Temp, variable = "CurrentTemperature", name="Temperature"},
     ['H'] = { deviceXML = "D_HumiditySensor1.xml", serviceId = SID_Humid, variable = "CurrentLevel", name="Humidity"},
     ['U'] = { deviceXML = "D_LightSensor1.xml", deviceJSON = "D_UVSensor1.json", serviceId = SID_UV, variable = "CurrentLevel", name="UV Index"},
-    ['P'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 1 , name="Pressure"},
-    ['O'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 2 , name="Ozone"},
-    ['V'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 3 , name="Visibility"},
-    ['W'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 4 , name="Wind"},
-    ['R'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 5 , name="Precipitation"},
-    ['Q'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 6 , name="Air Quality"},
-    ['X'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 6 , name="Air Quality values"}
+    ['P'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 1 , name="Pressure"},
+    ['O'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 2 , name="Ozone"},
+    ['V'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 3 , name="Visibility"},
+    ['W'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 4 , name="Wind"},
+    ['R'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 5 , name="Precipitation"},
+    ['Q'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 6 , name="Air Quality"},
+    ['X'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 6 , name="Air Quality values"}
   },
   {__index = function ()  -- default for everything else
-      return { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel"} 
+      return { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel"} 
     end
   }
 )
@@ -976,7 +978,7 @@ local ProviderMap = {
 						["wind_gust"] = "WindGust"
 				}
 				local iconMap = {
-					["01d"] = 32, ["01n"] = 13, ["02d"] = 34, ["02n"] = 33, ["03d"] = 30, ["03n"] = 29, ["04d"] = 28,
+					["01d"] = 32, ["01n"] = 31, ["02d"] = 34, ["02n"] = 33, ["03d"] = 30, ["03n"] = 29, ["04d"] = 28,
 					["04n"] = 29, ["09d"] = 11, ["09n"] = 11, ["11d"] = 38, ["11n"] = 47, ["13d"] = 16, ["13n"] = 16,
 					["50d"] = 20, ["50n"] = 20
 				}
@@ -1569,18 +1571,11 @@ local function setvariables(variable, varmap, value, prefix)
 		local c = varmap.childKey
 		var.Set(SensorInfo[c].variable, value, SensorInfo[c].serviceId, varmap.childID)
 		-- Set display values for generic sensors
-		if c == "W" or c == "Q" or c == "X" then
+		if c == "W" or c == "Q" or c == "X" or c == "R" then
 			luup.call_delay("MS_UpdateMultiDataItem",2,c..varmap.childID)
-		elseif c == "R" then
-			-- Value is new PrecipProbability, when more than 1% display other than just dry
-			if value > 1 then
-				luup.call_delay("MS_UpdateMultiDataItem",2,c..varmap.childID)
-			else
-				var.Set("DisplayLine1", "No Precipitation expected", SID_AltUI, varmap.childID)
-				var.Set("DisplayLine2", "", SID_AltUI, varmap.childID)
-			end
 		else
 			var.Set("DisplayLine1", value, SID_AltUI, varmap.childID)
+			var.Set("DisplayLine1", value, SID_WeatherM, varmap.childID)
 		end
 	end
 --[[
@@ -1603,20 +1598,24 @@ function MS_UpdateMultiDataItem(data)
 	
 	local item = ss(data,1,1)
 	local ID = tonumber(ss(data,2))
+	local si = SensorInfo[item]
+	local dl1, dl2 = "", ""
 	if item == "W" then
 		log.Debug("Updating wind data for child device "..ID)
 		local ws = var.GetNumber("CurrentWindSpeed")
 		local wg = var.GetNumber("CurrentWindGust")
 		local wb = var.GetNumber("CurrentWindBearing")
-		var.Set("DisplayLine1", sf("Speed %.1f, Gust %.1f ",ws,wg), SID_AltUI, ID)
-		var.Set("DisplayLine2", sf("Bearing %d ",wb), SID_AltUI, ID)
+		if si then var.Set(si.variable, ws, si.serviceId, ID) end
+		dl1 = sf("Speed %.1f, Gust %.1f ",ws,wg)
+		dl2 = sf("Bearing %d ",wb)
 	elseif item == "Q" then
 		log.Debug("Updating air quality data for child device "..ID)
 		local aqi = var.Get("CurrentAirQuality")
 		local pm10 = var.GetNumber("CurrentPM10")
 		local pm25 = var.GetNumber("CurrentPM25")
-		var.Set("DisplayLine1", sf("Air Qual. Ind. %s",aqi), SID_AltUI, ID)
-		var.Set("DisplayLine2", sf("Fine part. %.2f, Coarse part. %.2f",pm25,pm10), SID_AltUI, ID)
+		if si then var.Set(si.variable, aqi, si.serviceId, ID) end
+		dl1 = sf("Air Qual. Ind. %s",aqi)
+		dl2 = sf("Fine part. %.2f, Coarse part. %.2f",pm25,pm10)
 	elseif item == "X" then
 		log.Debug("Updating air quality 2 data for child device "..ID)
 		local co = var.GetNumber("CurrentCO")
@@ -1624,16 +1623,25 @@ function MS_UpdateMultiDataItem(data)
 		local no2 = var.GetNumber("CurrentNO2")
 		local so2 = var.GetNumber("CurrentSO2")
 		local nh3 = var.GetNumber("CurrentNH3")
-		var.Set("DisplayLine1", sf("CO %d, NO %.2f, NO2 %.2f",co,no,no2), SID_AltUI, ID)
-		var.Set("DisplayLine2", sf("NH3 %.2f, SO2 %.2f",so2,nh3), SID_AltUI, ID)
+		dl1 = sf("CO %d, NO %.2f, NO2 %.2f",co,no,no2)
+		dl2 = sf("NH3 %.2f, SO2 %.2f",so2,nh3)
 	elseif item == "R" then
 		log.Debug("Updating rain data for child device "..ID)
 		local pp = var.GetNumber("CurrentPrecipProbability")
 		local pi = var.GetNumber("CurrentPrecipIntensity")
 		local pt = var.Get("CurrentPrecipType")
-		var.Set("DisplayLine1", sf("Type %s ",pt), SID_AltUI, ID)
-		var.Set("DisplayLine2", sf("Probability %d%%, Intensity %.2f",pp,pi), SID_AltUI, ID)
+		if si then var.Set(si.variable, pi, si.serviceId, ID) end
+		if pi > 0 then
+			dl1 = sf("Type %s ",pt)
+			dl2 = sf("Probability %d%%, Intensity %.2f",pp,pi)
+		else
+			dl1 = "No Precipitation expected"
+		end
 	end
+	var.Set("DisplayLine1", dl1, SID_AltUI, ID)
+	var.Set("DisplayLine1", dl1, SID_WeatherM, ID)
+	var.Set("DisplayLine2", dl2, SID_AltUI, ID)
+	var.Set("DisplayLine2", dl2, SID_WeatherM, ID)
 end
 
 -- Build display line based on user preference
