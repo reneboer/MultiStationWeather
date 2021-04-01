@@ -143,8 +143,7 @@ local VariablesMap = {
 		["WindSpeed"] = {decimal = 1},
 		["WindGust"] = {decimal = 1},
 		["Sunrise"] =  {},
-		["Sunset"] =  {},
-		["SunChange"] = {}
+		["Sunset"] =  {}
 	}
 }
 local languageMap = {
