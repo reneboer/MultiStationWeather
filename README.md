@@ -34,9 +34,9 @@ First select the Weather provider you want to use and if needed have an access k
 Home Page : www.darksky.net
 You will need an API key. This can no longer be obtained and is only included for backward compatibility with the DarkSky plugin.
 
-**Current Weather Variables included**: CurrentApparentTemperature, CurrentCloudCover, CurrentDewPoint, CurrentHumidity, Icon, CurrentOzone, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPrecipProbability, CurrentPrecipType, CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust
+**Current Weather Variables included**: CurrentApparentTemperature, CurrentCloudCover, CurrentDewPoint, CurrentHumidity, Icon, CurrentOzone, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPrecipProbability, CurrentPrecipType, CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust, CurrentSunset, CurrentSunrise
 
-**Forecast Weather Variables included**: Pressure, Conditions, Ozone, uvIndex, Visibility, PrecipIntensity, PrecipIntensityMax, PrecipProbability, PrecipType, MaxTemp, MinTemp, HighTemp, LowTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, DewPoint, Humidity, WindBearing, WindSpeed, WindGust
+**Forecast Weather Variables included**: Pressure, Conditions, Ozone, uvIndex, Visibility, PrecipIntensity, PrecipIntensityMax, PrecipProbability, PrecipType, MaxTemp, MinTemp, HighTemp, LowTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, DewPoint, Humidity, WindBearing, WindSpeed, WindGust, Sunset, Sunrise
 
 ### Weather Underground
 Home page : www.wunderground.com
@@ -47,16 +47,16 @@ The forecast data is refreshed only 5 past each hour even if the update interval
 
 **Current Weather Variables included**: CurrentApparentTemperature, CurrentDewPoint, CurrentHumidity, Icon, CurrentuvIndex, CurrentPrecipIntensity,	CurrentPressure, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust
 
-**Forecast Weather Variables included**: Conditions, uvIndex, PrecipIntensity, PrecipProbability, PrecipType, MaxTemp, MinTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, DewPoint, Humidity, WindBearing, WindSpeed
+**Forecast Weather Variables included**: Conditions, uvIndex, PrecipIntensity, PrecipProbability, PrecipType, MaxTemp, MinTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, DewPoint, Humidity, WindBearing, WindSpeed, Sunrise, Sunset
 
 ### OpenWeather
 Home page : www.openweathermap.org
 This is a good replacement for DarkSky. You can get a free provider key that allows for 1M requests per month, more than sufficient for this use.
 Note that the Standard units will report the temperature in Kelvin, so you probably want to make sure to select Metric or Imperial.
 
-**Current Weather Variables included**: CurrentApparentTemperature, CurrentCloudCover, CurrentDewPoint, CurrentHumidity, Icon, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPrecipType, CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust, CurrentOzone, CurrentAirQuality, CurrentCO, CurrentNO, CurrentNO2, CurrentSO2, CurrentNH3, CurrentPM25, CurrentPM10
+**Current Weather Variables included**: CurrentApparentTemperature, CurrentCloudCover, CurrentDewPoint, CurrentHumidity, Icon, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPrecipType, CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust, CurrentOzone, CurrentAirQuality, CurrentCO, CurrentNO, CurrentNO2, CurrentSO2, CurrentNH3, CurrentPM25, CurrentPM10, CurrentSunrise, CurrentSunset.
 
-**Forecast Weather Variables included**: Pressure, Conditions, uvIndex, Visibility, PrecipIntensity, PrecipProbability, PrecipType, MaxTemp, MinTemp, HighTemp, LowTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, DewPoint, Humidity, WindBearing, WindSpeed, WindGust
+**Forecast Weather Variables included**: Pressure, Conditions, uvIndex, Visibility, PrecipIntensity, PrecipProbability, PrecipType, MaxTemp, MinTemp, HighTemp, LowTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, DewPoint, Humidity, WindBearing, WindSpeed, WindGust, Sunrise, Sunset
 
 ### Accu Weather
 Home page : www.accuweather.com
@@ -65,7 +65,7 @@ In the Settings you see the Station name. If this is not populated, a look up wi
 
 **Current Weather Variables included**: CurrentApparentTemperature, CurrentCloudCover, CurrentDewPoint, CurrentHumidity, Icon, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPrecipType, CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust
 
-**Forecast Weather Variables included**: Conditions, PrecipIntensity, PrecipIntensityMax, PrecipProbability, PrecipType, MaxTemp, MinTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, WindBearing, WindSpeed, WindGust
+**Forecast Weather Variables included**: Conditions, PrecipIntensity, PrecipIntensityMax, PrecipProbability, PrecipType, MaxTemp, MinTemp, ApparentMaxTemp, ApparentMinTemp, Icon, CloudCover, WindBearing, WindSpeed, WindGust, Sunrise, Sunset
 
 ### Ambient Weather
 Home Page : www.ambientweather.net
@@ -82,4 +82,12 @@ This is a Dutch weather provider for local weater and forecasts. There is no nee
 
 **Current Weather Variables included**: CurrentApparentTemperature, CurrentHumidity, Icon, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust
 
-**Forecast Weather Variables included**: Conditions, PrecipIntensity, PrecipIntensityMax, PrecipProbability, MaxTemp, MinTemp, WindSpeed
+**Forecast Weather Variables included**: Conditions, PrecipIntensity, PrecipIntensityMax, PrecipProbability, MaxTemp, MinTemp, WindSpeed, SunProbability
+
+### KNMI (the Netherlands only)
+Home page : www.weerlive.nl
+This is the Dutch national weather provider for local weater and forecasts. You have to apply for an API key. The number of returned parameters is fairly limited and there is only today ant tomorrow for forecast.
+
+**Current Weather Variables included**: CurrentApparentTemperature, CurrentHumidity, Icon, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust
+
+**Forecast Weather Variables included**: Conditions, PrecipIntensity, PrecipIntensityMax, PrecipProbability, MaxTemp, MinTemp, WindSpeed, SunProbability
