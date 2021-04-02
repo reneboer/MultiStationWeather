@@ -182,16 +182,16 @@ local SensorInfo = setmetatable (
     ['T'] = { deviceXML = "D_TemperatureSensor1.xml", serviceId = SID_Temp, variable = "CurrentTemperature", name="Temperature"},
     ['H'] = { deviceXML = "D_HumiditySensor1.xml", serviceId = SID_Humid, variable = "CurrentLevel", name="Humidity"},
     ['U'] = { deviceXML = "D_LightSensor1.xml", deviceJSON = "D_UVSensor1.json", serviceId = SID_UV, variable = "CurrentLevel", name="UV Index"},
-    ['P'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 1 , name="Pressure"},
-    ['O'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 2 , name="Ozone"},
-    ['V'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 3 , name="Visibility"},
-    ['W'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 4 , name="Wind"},
-    ['R'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 5 , name="Precipitation"},
-    ['Q'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 6 , name="Air Quality"},
-    ['X'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel", icon = 6 , name="Air Quality values"}
+    ['P'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 1 , name="Pressure"},
+    ['O'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 2 , name="Ozone"},
+    ['V'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 3 , name="Visibility"},
+    ['W'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 4 , name="Wind"},
+    ['R'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 5 , name="Precipitation"},
+    ['Q'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 6 , name="Air Quality"},
+    ['X'] = { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel", icon = 6 , name="Air Quality values"}
   },
   {__index = function ()  -- default for everything else
-      return { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_WeatherM, variable = "CurrentLevel"} 
+      return { deviceXML = "D_MsWeatherMetric.xml", serviceId = SID_Generic, variable = "CurrentLevel"} 
     end
   }
 )
@@ -1570,6 +1570,7 @@ local function setvariables(variable, varmap, value, prefix)
 	if varmap.childID then -- we update the child device as well
 		local c = varmap.childKey
 		var.Set(SensorInfo[c].variable, value, SensorInfo[c].serviceId, varmap.childID)
+		var.Set(SensorInfo[c].variable, value, SID_WeatherM, varmap.childID)
 		-- Set display values for generic sensors
 		if c == "W" or c == "Q" or c == "X" or c == "R" then
 			luup.call_delay("MS_UpdateMultiDataItem",2,c..varmap.childID)

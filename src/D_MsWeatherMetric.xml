@@ -24,6 +24,11 @@
 				<serviceId>urn:upnp-rboer-com:serviceId:WeatherMetric1</serviceId>
 				<SCPDURL>S_MsWeatherMetric.xml</SCPDURL>
 			</service>
+			<service>
+				<serviceType>urn:schemas-micasaverde-com:service:GenericSensor:1</serviceType>
+				<serviceId>urn:micasaverde-com:serviceId:GenericSensor1</serviceId>
+				<SCPDURL>S_GenericSensor1.xml</SCPDURL>
+			</service>
 		</serviceList>
 	</device>
 </root>
