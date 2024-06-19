@@ -915,7 +915,7 @@ local ProviderMap = {
 				return complete
 			end, 
 			update = function()
-				local urltemplate = "https://api.openweathermap.org/data/2.5/onecall?lat=%s&lon=%s&units=%s&lang=%s&appid=%s&exclude=hourly"
+				local urltemplate = "https://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&units=%s&lang=%s&appid=%s&exclude=hourly"
 				local url = string.format(urltemplate, MS.Latitude, MS.Longitude, MS.Units, MS.Language, MS.Key)
 				-- See if user wants forecast, if not eliminate daily from request
 				if MS.ForecastDays == 0 then url = url .. ",daily" end
