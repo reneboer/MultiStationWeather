@@ -52,7 +52,7 @@ The forecast data is refreshed only 5 past each hour even if the update interval
 
 ### OpenWeather
 Home page : www.openweathermap.org
-This is a good replacement for DarkSky. You can get a free provider key that allows for 1M requests per month, more than sufficient for this use.
+This is a good replacement for DarkSky. You can get a provider key that allows for 1M requests per month at no costs, more than sufficient for this use. For V1.4 you will need to register for the "One Call API 3.0".
 Note that the Standard units will report the temperature in Kelvin, so you probably want to make sure to select Metric or Imperial.
 
 **Current Weather Variables included**: CurrentApparentTemperature, CurrentCloudCover, CurrentDewPoint, CurrentHumidity, Icon, CurrentuvIndex, CurrentVisibility, CurrentPrecipIntensity,	CurrentPrecipType, CurrentPressure, CurrentConditions, CurrentTemperature, LastUpdate, CurrentWindBearing, CurrentWindSpeed, CurrentWindGust, CurrentOzone, CurrentAirQuality, CurrentCO, CurrentNO, CurrentNO2, CurrentSO2, CurrentNH3, CurrentPM25, CurrentPM10, CurrentSunrise, CurrentSunset.
