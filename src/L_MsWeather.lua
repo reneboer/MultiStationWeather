@@ -1,11 +1,20 @@
 ABOUT = {
 	NAME = "Multi Weather Station",
-	VERSION = "1.1",
+	VERSION = "1.4",
 	DESCRIPTION = "Multi Weather Station plugin",
 	AUTHOR = "Rene Boer"
 }	
 --[[
 Icons based on Wunderground. Information : https://docs.google.com/document/d/1qpc4QN3YDpGDGGNYVINh7tfeulcZ4fxPSC5f4KzpR_U/edit
+
+Version 1.4 2024-08-08
+	- Switched to OpenWeather 3.0 API.
+
+Version 1.3 2023-08-01
+	- Fix in URL for ambientweather.
+
+Version 1.2 2021-05-7
+	- Added solar radiation for Wunderground PWS
 
 Version 1.1 2021-04-1
 	- Added KNMI (weerlive, NL) weather provider
@@ -101,6 +110,7 @@ local VariablesMap = {
 		["CurrentPM10"] = {},
 		["CurrentAirQuality"] = {childKey = "Q", childID = nil},
 		["CurrentuvIndex"] = {childKey = "U", childID = nil},
+		["CurrentSolarRadiation"] = {},
 		["CurrentVisibility"] = {decimal = 3, childKey = "V", childID = nil},
 		["CurrentPrecipIntensity"] = {childKey = "R", childID = nil},
 		["CurrentPrecipProbability"] = {decimal = 0},
@@ -794,6 +804,7 @@ local ProviderMap = {
 --						[""] = "Icon",
 --						[""] = "CurrentOzone",
 						["uv"] = "CurrentuvIndex",
+						["solarRadiation"] = "CurrentSolarRadiation",
 --						[""] = "CurrentVisibility",
 						["units.precipRate"] = "CurrentPrecipIntensity",
 --						[""] = "CurrentPrecipProbability",
@@ -1251,7 +1262,7 @@ local ProviderMap = {
 				return complete
 			end, 
 			update = function()
-				local urltemplate = "https://api.ambientweather.net/v1/devices?applicationKey=%sapiKey=%s"
+				local urltemplate = "https://api.ambientweather.net/v1/devices?applicationKey=%s&apiKey=%s"
 				local url = string.format(urltemplate, MS.ApplicationKey, MS.Key)
 				log.Debug("calling AmbientWeather API with url = %s", url)
 				local wdata, retcode, headers, res = HttpsGet(url)
