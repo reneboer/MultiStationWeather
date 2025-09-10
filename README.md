@@ -1,3 +1,6 @@
+# No longer maintained by me.
+I no longer use Vera or openLuup so no option to maintain this any longer.
+
 # MultiStationWeather
 Vera and openLuup plugin to get weather data from your favourite Weather Station. This can be used as replacement for the DarkSky weather plugin as Apple decided to stop with that service end 2021.
 
